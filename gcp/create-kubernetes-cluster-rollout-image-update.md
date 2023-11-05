@@ -46,7 +46,7 @@ CMD ["node","server.js"]
 
 ## server.js
 
-`
+<code>
 var http = require("http");
 const os = require('os');
 let totalVisitor = 0;
@@ -73,7 +73,7 @@ function getIP() {
     }
     return a;
 }
-`
+</code>
 
 
 
