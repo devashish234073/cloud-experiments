@@ -213,11 +213,29 @@ docker build -t nodeapp .
 ```
 Then we will tag and push the image to "Artifact Registery" with below command, [Notice this time the tag is v1 instead of v0]:
 ```
-docker tag nodeapp us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v0
-docker push us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v0
+docker tag nodeapp us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v1
+docker push us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v1
 ```
 If we open Artifact Registry now it will show both the versions:
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/034d5fd6-6776-4198-9802-7c6e9d1720aa)
+
+Our kubernetes cluster is still running the same old v0, we need to point to the new image using the below command:
+```
+kubectl set image deployment/dep1 nodeapp=us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v1
+```
+We can check the status of rollout using:
+```
+kubectl rollout status deployment/dep1
+```
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/70593678-ac9d-463d-b0fd-56fe0e795593)
+At this point if you run "kubectl get pods", you can see few pods getting created and few being deleted:
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/ff8eea95-c158-488b-affb-537fe6a113b7)
+
+Once rollout finished we can run "kubectl get services" and get the enternal endpoint, it will be same as before, but now it will show the changes we did in v1 version of the application:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/5e43eaa9-618d-4ec1-afb5-be17ba6e30d2)
+
+
 
 
 
