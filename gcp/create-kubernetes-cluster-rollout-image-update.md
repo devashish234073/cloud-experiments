@@ -168,13 +168,44 @@ kubectl scale deployment dep1 --replicas=3
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/7991944c-fa2d-4022-8dd5-10fb29f64529)
 
-After this you will be able to see different responses when you hit that IP as responses can be coming from any of the three pods:
+After this you will be able to see different responses when you hit that EXTERNAL_IP:8080 as responses can be coming from any of the three pods:
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/ba9c4a17-a5ed-4ae6-b62c-3943f016142c)
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/8c2eaf4e-3241-401a-bd3d-49fc1b74652b)
 
 Next we will update the code and deploy a new image with a different tag "v1" and rollout the update to the kubernetes cluster
+
+This time we will add a time in the response text, the updated server.js file is:
+
+```
+var http = require("http");
+const os = require('os');
+let totalVisitor = 0;
+var server = http.createServer((req, res) => {
+    if (req.url == "/") {
+        totalVisitor++;
+    }
+    res.end((new Date())+" | This application is being served from " + getIP() + " and you are " + totalVisitor + "th visitor.");
+});
+let PORT = 8081;
+server.listen(PORT, () => {
+    console.log(`listening on PORT ${PORT}`);
+});
+
+function getIP() {
+    const interfaces = os.networkInterfaces();
+    let a = "";
+    for (const key in interfaces) {
+        for (const info of interfaces[key]) {
+            if (info.family === 'IPv4' && !info.internal) {
+                a += "[" + key + " " + info.address + "] ";
+            }
+        }
+    }
+    return a;
+}
+```
 
 
 
