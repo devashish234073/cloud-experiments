@@ -17,12 +17,63 @@ Clicking on it will show steps to get credentials for connecting to the cluster:
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/e785fbe5-4fbd-4fce-822b-ce99b7c793e9)
 
-Its the below command here:
+Its the below command here(make sure to replace the name of cluster, region and projectid that you have used):
 
 `
 gcloud container clusters get-credentials cluster1 --region us-central1 --project yootooo
 `
 
+Running this in cloud shell will show a popup to authorize it, click on the authorize:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/59741e39-24de-4af7-a56a-e9ef3c572519)
+
+Create a new directory named "app"(you can use any other name) and create two files in it:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/6499327c-6adb-4767-91ae-6a02a9e35a02)
+
+Below are the contents of the two files:
+
+## Dockerfile
+
+`
+FROM node:14
+RUN mkdir node
+COPY server.js ./node
+WORKDIR ./node/
+EXPOSE 8081
+CMD ["node","server.js"]
+`
+
+## server.js
+
+`
+var http = require("http");
+const os = require('os');
+let totalVisitor = 0;
+var server = http.createServer((req, res) => {
+    if (req.url == "/") {
+        totalVisitor++;
+    }
+    res.end("This application is being served from " + getIP() + " and you are " + totalVisitor + "th visitor.");
+});
+let PORT = 8081;
+server.listen(PORT, () => {
+    console.log("listening on PORT "+PORT);
+});
+
+function getIP() {
+    const interfaces = os.networkInterfaces();
+    let a = "";
+    for (const key in interfaces) {
+        for (const info of interfaces[key]) {
+            if (info.family === 'IPv4' && !info.internal) {
+                a += "[" + key + " " + info.address + "] ";
+            }
+        }
+    }
+    return a;
+}
+`
 
 
 
