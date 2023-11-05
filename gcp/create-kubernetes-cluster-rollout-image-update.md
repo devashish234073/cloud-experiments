@@ -207,6 +207,21 @@ function getIP() {
 }
 ```
 
+We will repeat the docker build with the same command as we want to keep the name of the image same and only change its tag:
+```
+docker build -t nodeapp .
+```
+Then we will tag and push the image to "Artifact Registery" with below command, [Notice this time the tag is v1 instead of v0]:
+```
+docker tag nodeapp us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v0
+docker push us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v0
+```
+If we open Artifact Registry now it will show both the versions:
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/034d5fd6-6776-4198-9802-7c6e9d1720aa)
+
+
+
+
 
 
 
