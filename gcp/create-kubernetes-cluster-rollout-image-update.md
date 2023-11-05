@@ -130,6 +130,39 @@ Once created you have refresh the repo in console and it will be visible like th
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/567f9ea1-e4ec-410a-958f-8663edf5723a)
 
+## Back to kubernetes commands, since we have already run the following command for our cluster, we can start running kubectl commands.
+
+```
+gcloud container clusters get-credentials cluster1 --region us-central1 --project yootooo
+```
+
+## We will start with creating a deploymnt using the above image(if you see any connectivity issue, rerun the above command)
+
+```
+kubectl create deployment dep1 --image=us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v0
+```
+
+If its created successfully you should see the text "deployment.apps/dep1 created" in cloud shell
+
+## Next expose this deployment
+
+```
+kubectl expose deployment dep1 --port=8080 --target-port=8081 --type=LoadBalancer
+```
+
+You can check the status of pod by running "kubectl get pods" and can get the external ip by running "kubectl get services":
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/cadef7ec-600c-4ec0-a4e4-d67eedeea77d)
+
+You can copy the external IP and append the port 8080 to access the application:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/1db7389c-4032-4369-aa4a-6cad905505eb)
+
+Note: Our application is running on port 8081 as you can see in the server.js file abover , but in the "kubectl expose deployment " command we have mapped port 8080 to 8081, hence accessing it at port 8080
+
+
+
+
 
 
 
