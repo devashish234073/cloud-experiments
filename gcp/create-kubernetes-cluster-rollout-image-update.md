@@ -160,6 +160,31 @@ You can copy the external IP and append the port 8080 to access the application:
 
 Note: Our application is running on port 8081 as you can see in the server.js file abover , but in the "kubectl expose deployment " command we have mapped port 8080 to 8081, hence accessing it at port 8080
 
+After this we will scale the deployment by running:
+
+```
+kubectl scale deployment dep1 --replicas=3
+```
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/7991944c-fa2d-4022-8dd5-10fb29f64529)
+
+After this you will be able to see different responses when you hit that IP as responses can be coming from any of the three pods:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/ba9c4a17-a5ed-4ae6-b62c-3943f016142c)
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/8c2eaf4e-3241-401a-bd3d-49fc1b74652b)
+
+Next we will update the code and deploy a new image with a different tag "v1" and rollout the update to the kubernetes cluster
+
+
+
+
+
+
+
+
+
+
 
 
 
