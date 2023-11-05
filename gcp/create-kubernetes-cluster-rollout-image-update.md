@@ -19,9 +19,9 @@ Clicking on it will show steps to get credentials for connecting to the cluster:
 
 Its the below command here:
 
-<code>
+`
 gcloud container clusters get-credentials cluster1 --region us-central1 --project yootooo
-</code>
+`
 
 
 
