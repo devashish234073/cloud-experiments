@@ -35,18 +35,19 @@ Below are the contents of the two files:
 
 ## Dockerfile
 
-`
+```
 FROM node:14
 RUN mkdir node
 COPY server.js ./node
 WORKDIR ./node/
 EXPOSE 8081
 CMD ["node","server.js"]
-`
+```
+Using this file we will build the image containing the below nodejs application
 
 ## server.js
 
-<code>
+```
 var http = require("http");
 const os = require('os');
 let totalVisitor = 0;
@@ -73,7 +74,41 @@ function getIP() {
     }
     return a;
 }
-</code>
+```
+
+This nodejs code displays the ip of the pod in which it is running and it also has a counter variable to track the number of times this url is hit.
+
+## Next create a repository in "Artifact Registery" using gcp console(we will have to push the image we will built using the Dockerfile to this repo):
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/56b59b66-243c-4673-b22a-a44a0f2c3d68)
+
+Give the repo an appropriate name and create it:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/30944fc5-4b03-44dd-9f18-b12d4ae7ad24)
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/a0985ad3-b078-450e-b977-9f326a9ac81f)
+
+## Next click on "Setup Instruction" to get the first step to configure docker:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/ddc970f4-ab9a-4fed-a35c-0aa2648861b3)
+
+It will show the below command to run in the cloud shell:
+
+```
+gcloud auth configure-docker us-central1-docker.pkg.dev
+```
+
+## Next Build the image by running the below code in the cloud shell(making sure you are in the same directory as the Dockerfile and server.js):
+
+```
+docker build -t nodeapp .
+```
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/9f7caded-c6bc-4cfb-b755-60eef23aa414)
+
+
+
+
 
 
 
