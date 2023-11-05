@@ -98,13 +98,42 @@ It will show the below command to run in the cloud shell:
 gcloud auth configure-docker us-central1-docker.pkg.dev
 ```
 
-## Next Build the image by running the below code in the cloud shell(making sure you are in the same directory as the Dockerfile and server.js):
+## Run the above code and then build the image by running the below code in the cloud shell(making sure you are in the same directory as the Dockerfile and server.js):
 
 ```
 docker build -t nodeapp .
 ```
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/9f7caded-c6bc-4cfb-b755-60eef23aa414)
+
+## Inside the repo there is a copy button copy the full name of the repo by clicking on it:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/0fbebdc2-2a86-4bc8-bee7-e55e74261bd4)
+
+It will copy  this text: "us-central1-docker.pkg.dev/yootooo/myrepo"
+
+## Now tag the image we build above with this copied name:
+
+```
+docker tag nodeapp us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v0
+```
+
+Notice I have added the imagename also with the repo path
+
+## Next push the image to artifact registery by running the below code:
+
+```
+docker push us-central1-docker.pkg.dev/yootooo/myrepo/nodeapp:v0
+```
+
+Once created you have refresh the repo in console and it will be visible like this:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/567f9ea1-e4ec-410a-958f-8663edf5723a)
+
+
+
+
+
 
 
 
