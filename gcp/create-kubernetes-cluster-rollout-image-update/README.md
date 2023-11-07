@@ -243,7 +243,7 @@ In cloud shell you can clone the repo and running the file by getting to that di
 git clone https://github.com/devashish234073/cloud-experiments
 cd  cloud-experiments/gcp/create-kubernetes-cluster-rollout-image-update
 chmod a+x automation.sh
-./automation.sh yootooo us-central1 cluster1 repo1 img1 v0 dep1 8081
+./automation.sh yootooo us-central1 clusterr1 reppo1 imgg1 v0 depp1 8081
 #here arg1 is projectid, arg2 is the region, arg3 is the cluster name
 #arg4 the repo name, arg5 the image name and arg6 the image tag
 #arg7 is the deployment name and arg8 is the port in which application is running
