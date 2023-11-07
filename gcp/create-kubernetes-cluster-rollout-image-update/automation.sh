@@ -1,5 +1,4 @@
 #!/bin/bash
-git clone https://github.com/devashish234073/cloud-experiments
-cd cloud-experiments/gcp/create-kubernetes-cluster-rollout-image-update
-chmod a+x automation.sh
+gcloud auth login
+gcloud container --project "yootooo" clusters create-auto "$3" --region "$2" --release-channel "regular" --network "projects/$1/global/networks/default" --subnetwork "projects/$1/regions/$2/subnetworks/default" --cluster-ipv4-cidr "/17"
 
