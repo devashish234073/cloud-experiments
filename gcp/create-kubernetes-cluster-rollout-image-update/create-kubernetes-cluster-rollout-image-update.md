@@ -235,6 +235,19 @@ Once rollout finished we can run "kubectl get services" and get the enternal end
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/5e43eaa9-618d-4ec1-afb5-be17ba6e30d2)
 
+# Automations:
+
+For automating the cluster creaton process, run the automaton.sh.
+In cloud shell you can get the file by running:
+```
+wget https://github.com/devashish234073/cloud-experiments/blob/main/gcp/create-kubernetes-cluster-rollout-image-update/automation.sh
+```
+And then change the access and run the file by running following command
+```
+chmod a+x automation.sh
+./automation.sh cluster1 repo1 img1 v0
+```
+
 
 
 
