@@ -1,0 +1,244 @@
+{
+  "Resources": {
+    "cfVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true"
+      }
+    },
+    "cfSubnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "cfVPC"
+        },
+        "CidrBlock": "10.0.1.0/24",
+        "MapPublicIpOnLaunch": true,
+        "AvailabilityZone": "ap-south-1a"
+      }
+    },
+    "cfSubnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "cfVPC"
+        },
+        "CidrBlock": "10.0.9.0/24",
+        "MapPublicIpOnLaunch": true,
+        "AvailabilityZone": "ap-south-1b"
+      }
+    },
+    "ec2WithVnc": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": "ami-03f4878755434977f",
+        "InstanceType": "t2.micro",
+        "KeyName": "kp1",
+        "UserData": {
+          "Fn::Sub": "IyEvYmluL2Jhc2gKYXB0IHVwZGF0ZSAteQphcHQtZ2V0IGluc3RhbGwgLXkgYXBhY2hlMgpzZXJ2aWNlIGFwYWNoZTIgc3RhcnQKY2F0IDw8RU9GID4gL3Zhci93d3cvaHRtbC9pbmRleC5odG1sCjwhRE9DVFlQRSBodG1sPgo8aHRtbD4KPGhlYWQ+Cjx0aXRsZT5QbGVhc2Ugd2FpdCB3aGlsZSBzdGFydHVwIHNjcmlwdCBjb21wbGV0ZXM8L3RpdGxlPgo8L2hlYWQ+Cjxib2R5Pgo8aDE+UGxlYXNlIHdhaXQgd2hpbGUgc3RhcnR1cCBzY3JpcHQgY29tcGxldGVzLi48L2gxPgo8aDI+VmlkZW8gVHV0b3JpYWw8L2gyPgo8aWZyYW1lIHdpZHRoPSI3MjgiIGhlaWdodD0iNDQ3IiBzcmM9Imh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL2VtYmVkLzU2aUowbjZVczlrIiB0aXRsZT0iRUMyIGluc3RhbmNlIHdpdGggZGVza3RvcCBlbnZpcm9ubWVudCB8IGxhdW5jaCB1c2luZyBjbG91ZGZvcm1hdGlvbiB0ZW1wbGF0ZSB8IGF3cyB8IGF1dG9tYXRpb24iIGZyYW1lYm9yZGVyPSIwIiBhbGxvdz0iYWNjZWxlcm9tZXRlcjsgYXV0b3BsYXk7IGNsaXBib2FyZC13cml0ZTsgZW5jcnlwdGVkLW1lZGlhOyBneXJvc2NvcGU7IHBpY3R1cmUtaW4tcGljdHVyZTsgd2ViLXNoYXJlIiBhbGxvd2Z1bGxzY3JlZW4+PC9pZnJhbWU+CjxzY3JpcHQ+CiAgICBmdW5jdGlvbiBnZXRSYW5kb21JbnQoKSB7CiAgICAgICAgcmV0dXJuIE1hdGguZmxvb3IoTWF0aC5yYW5kb20oKSAqIDI1Nik7CiAgICB9CiAgICB2YXIgY29sb3IgPSAncmdiKCcgKyBnZXRSYW5kb21JbnQoKSArICcsJyArIGdldFJhbmRvbUludCgpICsgJywnICsgZ2V0UmFuZG9tSW50KCkgKyAnKSc7CiAgICBkb2N1bWVudC5xdWVyeVNlbGVjdG9yKCJoMSIpLnN0eWxlLmNvbG9yID0gY29sb3I7CiAgICBzZXRJbnRlcnZhbChmdW5jdGlvbigpIHsKICAgICAgICBsb2NhdGlvbi5yZWxvYWQoKTsKICAgIH0sIDEwMDApOwo8L3NjcmlwdD4KPC9ib2R5Pgo8L2h0bWw+CkVPRgphcHQgaW5zdGFsbCB4ZmNlNCB4ZmNlNC1nb29kaWVzIC15CmFwdCBpbnN0YWxsIHRpZ2h0dm5jc2VydmVyIC15CndnZXQgaHR0cHM6Ly9kbC5nb29nbGUuY29tL2xpbnV4L2RpcmVjdC9nb29nbGUtY2hyb21lLXN0YWJsZV9jdXJyZW50X2FtZDY0LmRlYgpkcGtnIC1pIGdvb2dsZS1jaHJvbWUtc3RhYmxlX2N1cnJlbnRfYW1kNjQuZGViCnN1ZG8gYXB0LWdldCBpbnN0YWxsIC1mIC15CnB1YmxpY19pcD0kKGN1cmwgLXMgaHR0cDovLzE2OS4yNTQuMTY5LjI1NC9sYXRlc3QvbWV0YS1kYXRhL3B1YmxpYy1pcHY0KQplY2hvIFJVTiB2bmNzZXJ2ZXIgQU5EIFNFVFVQIFRIRSBQQVNTV09SRAplY2hvIFRIRU4gUlVOIHNzaCAtTCA1OTAxOmxvY2FsaG9zdDo1OTAxIC1pIGtwMS5wZW0gdWJ1bnR1QCRwdWJsaWNfaXAgV0lUSCBZT1VSIExPQ0FMIE1BQ0hJTkUgQU5EIFRIRU4gQ09OTkVDVCBVU0lORyBBIFZOQyBWSUVXRVIgQ0xJRU5UIEFUICIkcHVibGljX2lwIjo1OTAxCmVjaG8gZWNobyBzc2ggLUwgNTkwMTpsb2NhbGhvc3Q6NTkwMSAtaSBrcDEucGVtIHVidW50dUAkcHVibGljX2lwPi9ob21lL3VidW50dS90dW5uZWx2bmMuc2gKZWNobyBSdW4gdGhlIGFib3ZlIHNzaCBjb21tYW5kIGluIHlvdXIgbG9jYWwgbWFjaGluZSBhZnRlciBydW5uaWduIHZuY3NlcnZlciBjb21tYW5kIHRvIHNldHVwIHRoZSBwYXNzd29yZCA+Pi9ob21lL3VidW50dS90dW5uZWx2bmMuc2gKY2htb2QgYSt4IC9ob21lL3VidW50dS90dW5uZWx2bmMuc2gKY2F0IDw8RU9GID4gL3Zhci93d3cvaHRtbC9pbmRleC5odG1sCjwhRE9DVFlQRSBodG1sPgo8aHRtbD4KPGhlYWQ+Cjx0aXRsZT5WbmMgdmlld2VyIHNldHVwIGRvbmU8L3RpdGxlPgo8L2hlYWQ+Cjxib2R5Pgo8aDE+Vm5jIHZpZXdlciBzZXR1cCBkb25lPC9oMT4KPHA+UnVuICd2bmNzZXJ2ZXInIGluIHRoZSBlYzIoJHB1YmxpY19pcCkgdGVybmltYWwgdG8gc2V0dXAgdm5jIHBhc3N3b3JkPC9wPgo8cD5UaGVuIHJ1biB0aGlzIGluIHRlcm1pbmFsL2NvbW1hbmQgbGluZSBmcm9tIHlvdXIgbG9jYWwgbWFjaGluZSB3aGVyZSB5b3UgaGF2ZSB2bmN2aWV3ZXIgaW5zdGFsbGVkOiBzc2ggLUwgNTkwMTpsb2NhbGhvc3Q6NTkwMSAtaSBrcDEucGVtIHVidW50dUAkcHVibGljX2lwICA8L3A+CjxwPkZpbmFsbHkgY29ubmVjdCB0byAibG9jYWxob3N0OjU5MDEiIHVzaW5nIHlvdXIgdm5jdmlld2VyIGNsaWVudDwvcD4KPGgyPlZpZGVvIFR1dG9yaWFsPC9oMj4KPGlmcmFtZSB3aWR0aD0iNzI4IiBoZWlnaHQ9IjQ0NyIgc3JjPSJodHRwczovL3d3dy55b3V0dWJlLmNvbS9lbWJlZC81NmlKMG42VXM5ayIgdGl0bGU9IkVDMiBpbnN0YW5jZSB3aXRoIGRlc2t0b3AgZW52aXJvbm1lbnQgfCBsYXVuY2ggdXNpbmcgY2xvdWRmb3JtYXRpb24gdGVtcGxhdGUgfCBhd3MgfCBhdXRvbWF0aW9uIiBmcmFtZWJvcmRlcj0iMCIgYWxsb3c9ImFjY2VsZXJvbWV0ZXI7IGF1dG9wbGF5OyBjbGlwYm9hcmQtd3JpdGU7IGVuY3J5cHRlZC1tZWRpYTsgZ3lyb3Njb3BlOyBwaWN0dXJlLWluLXBpY3R1cmU7IHdlYi1zaGFyZSIgYWxsb3dmdWxsc2NyZWVuPjwvaWZyYW1lPgo8L2JvZHk+CjwvaHRtbD4KRU9GCnN5c3RlbWN0bCBlbmFibGUgYXBhY2hlMgo="
+        },
+        "IamInstanceProfile": {
+          "Ref": "cfInstanceProfile"
+        },
+        "NetworkInterfaces": [
+          {
+            "DeviceIndex": "0",
+            "AssociatePublicIpAddress": "true",
+            "DeleteOnTermination": "true",
+            "SubnetId": {
+              "Ref": "cfSubnet1"
+            },
+            "GroupSet": [
+              {
+                "Ref": "MySecurityGroup"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "MySecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Ref": "cfVPC"
+        },
+        "GroupDescription": "Allow SSH and HTTP traffic",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 5901,
+            "ToPort": 5901,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "MyInternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {}
+    },
+    "GatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "cfVPC"
+        },
+        "InternetGatewayId": {
+          "Ref": "MyInternetGateway"
+        }
+      }
+    },
+    "PublicRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "cfVPC"
+        }
+      }
+    },
+    "PublicRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "GatewayAttachment",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "MyInternetGateway"
+        }
+      }
+    },
+    "PublicSubnet1RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "cfSubnet1"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      }
+    },
+    "MyNetworkAcl": {
+      "Type": "AWS::EC2::NetworkAcl",
+      "Properties": {
+        "VpcId": {
+          "Ref": "cfVPC"
+        }
+      }
+    },
+    "MyNetworkAclEntryIngress1": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "MyNetworkAcl"
+        },
+        "RuleNumber": 100,
+        "Protocol": "6",
+        "RuleAction": "allow",
+        "CidrBlock": "0.0.0.0/0",
+        "Egress": false,
+        "PortRange": {
+          "From": 22,
+          "To": 22
+        }
+      }
+    },
+    "MyNetworkAclEntryEgress1": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "MyNetworkAcl"
+        },
+        "RuleNumber": 100,
+        "Protocol": "6",
+        "RuleAction": "allow",
+        "CidrBlock": "0.0.0.0/0",
+        "Egress": true,
+        "PortRange": {
+          "From": 22,
+          "To": 22
+        }
+      }
+    },
+    "cfInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "awsXrayRole"
+          }
+        ]
+      }
+    },
+    "awsXrayRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "XrayWriteOnlyAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "xray:PutTraceSegments",
+                    "xray:PutTelemetryRecords",
+                    "xray:GetSamplingRules",
+                    "xray:GetSamplingTargets",
+                    "xray:GetSamplingStatisticSummaries"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::my-bucket-for-xray/my-file.txt"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
