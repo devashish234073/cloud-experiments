@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home</title>
+    <style>
+        table {
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+        }
+        td {
+            border: 1px solid lightgray;
+        }
+        a {
+            display: block;
+            text-align: center;
+            background-color: green;
+            color: white;
+            padding:5px;
+            width:110px;
+            height:30px;
+        }
+        a:active{
+            color:black;
+        }
+        #registerUsersBtn, #showAllUsersBtn {
+            background-color: purple;
+        }
+        input{
+            height:30px;
+            width:110px;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td>Enter Id to search User</td>
+            <td><input type="number" id="id"></td>
+            <td><a id="searchBtn" onclick="searchValidation()">Search</a></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><a id="registerUsersBtn" href="registerUserHome">Register User</a></td>
+            <td><a id="showAllUsersBtn" href="showAllUsers">Show All Users</a></td>
+        </tr>
+    </table>
+    <script>
+        function $(selector) {
+            return document.querySelector(selector);
+        }
+        $("#id").addEventListener("keyup",()=>{
+            $("#searchBtn").setAttribute("href","search?id="+parseInt($("#id").value));
+        });
+        function searchValidation() {
+            if($("#searchBtn").href=="") {
+                alert("No id entered to search");
+            }
+        }
+    </script>
+</body>
+</html>
