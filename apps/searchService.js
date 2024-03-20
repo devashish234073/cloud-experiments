@@ -23,6 +23,11 @@ if (dbUrl!=null) {
 
 async function listenForCalls() {
     let server = http.createServer((req, res) => {
+        // Set CORS headers
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         if(req.url.indexOf("/health")==0) {
             res.end("OK");
         } else if(req.url=="/") {

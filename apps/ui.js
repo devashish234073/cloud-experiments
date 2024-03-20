@@ -30,6 +30,11 @@ if (registerServiceUrl!=null && searchServiceUrl!=null) {
 
 function listenForCalls() {
     let server = http.createServer((req, res) => {
+        // Set CORS headers
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         if (req.url.indexOf("/health") == 0) {
             res.end("OK");
         } else if (req.url == "/") {
@@ -38,6 +43,11 @@ function listenForCalls() {
                     res.end("Error occured");
                 } else {
                     let html = String(data);
+                    if(apiInteractionUrl) {
+                        html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px"src="${apiInteractionUrl}/ui"></iframe>`);
+                    } else {
+                        html=html.replace("__INTERACTION_UI__","");
+                    }
                     res.end(html);
                 }
             });
@@ -77,6 +87,11 @@ function listenForCalls() {
                         res.end("Error occured");
                     } else {
                         let html = String(data);
+                        if(apiInteractionUrl) {
+                            html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px" src="${apiInteractionUrl}/ui"></iframe>`);
+                        } else {
+                            html=html.replace("__INTERACTION_UI__","");
+                        }
                         res.end(html);
                     }
                 });

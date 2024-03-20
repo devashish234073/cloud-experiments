@@ -12,6 +12,11 @@ console.log(`Using PORT ${PORT}`);
 let logs = {};
 
 let server = http.createServer((req,res)=>{
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     if(req.url=="/health") {
         res.end("OK");
     } else if(req.url=="/" || req.url=="/showAll") {

@@ -9,6 +9,11 @@ for(let i=0;i<process.argv.length;i++) {
 console.log(`Using PORT ${PORT}`);
 let data = {"1":{"id":1,"name":"Devashish Priyadarshi"},"2":{"id":2,"name":"Hritik Roushan"}};
 let server = http.createServer((req,res)=>{
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     if(req.url.indexOf("/health")==0) {
         res.end("OK");
     } else if(req.url.indexOf("/insert?")==0) {

@@ -1,57 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log Interactions</title>
     <style>
         button {
-            height:80px;
-            width:80px;
+            height: 80px;
+            width: 80px;
             border-radius: 40px;
         }
+
         table {
             border-collapse: collapse;
-            margin-left:auto;
-            margin-right:auto;
+            margin-left: auto;
+            margin-right: auto;
         }
+
+        textarea {
+            width:260px;
+            height:250px;
+        }
+
         table td {
             border: 1px solid gray;
         }
+
         td[id] {
             background-color: green;
             color: white;
         }
+
+        td[id] span {
+            font-size: 10px;
+        }
     </style>
 </head>
+
 <body>
     <table>
         <tr>
-            <td></td><td></td><td><button>Register Service</button></td><td></td><td></td>
+            <td></td>
+            <td></td>
+            <td><button>Register Service</button></td>
+            <td></td>
+            <td></td>
         </tr>
         <tr>
-            <td></td><td id="UI__RegisterService"></td><td></td><td id="RegisterService__Db"></td><td></td>
+            <td></td>
+            <td id="UI__RegisterService" onclick="displayDetails('#UI__RegisterService')"></td>
+            <td></td>
+            <td id="RegisterService__Db" onclick="displayDetails('#RegisterService__Db')"></td>
+            <td></td>
         </tr>
         <tr>
-            <td><button>UI</button></td><td></td><td></td><td></td><td><button>Db</button></td>
+            <td><button>UI</button></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><button>Db</button></td>
         </tr>
         <tr>
-            <td></td><td id="UI__SearchService"></td><td></td><td id="SearchService__Db"></td><td></td>
+            <td></td>
+            <td id="UI__SearchService" onclick="displayDetails('#UI__SearchService')"></td>
+            <td></td>
+            <td id="SearchService__Db" onclick="displayDetails('#SearchService__Db')"></td>
+            <td></td>
         </tr>
         <tr>
-            <td></td><td></td><td><button>Search Service</button></td><td></td><td></td>
+            <td></td>
+            <td></td>
+            <td><button>Search Service</button></td>
+            <td></td>
+            <td></td>
         </tr>
     </table>
+    <table>
+        <tr>
+            <td>
+                <textarea id="details"></textarea>
+            </td>
+        </tr>
+    </table>
+    
     <script>
         function $(selector) {
             return document.querySelector(selector);
         }
         let logs = __DATA__;
-        let services = ["RegisterService__Db","SearchService__Db","UI__RegisterService","UI__SearchService"];
-        for(let serIndx in services) {
-            let service = services[serIndx];
-            $("#"+service).innerText = logs[service].length;
+        let services = ["RegisterService__Db", "SearchService__Db", "UI__RegisterService", "UI__SearchService"];
+        function clearApiInteractionCounts() {
+            for (let serIndx in services) {
+                let service = services[serIndx];
+                $("#" + service).innerHTML = "";
+                $("#" + service).setAttribute("title", "");
+                $("#" + service).setAttribute("temp","");
+            }
         }
+        function displayDetails(selector) {
+            $("#details").innerHTML = $(selector).getAttribute("temp");
+        }
+        function updateApiInteractionCounts() {
+            for (let serIndx in services) {
+                let service = services[serIndx];
+                let success = 0;
+                let fail = 0;
+                for (let indx in logs[service]) {
+                    let log = logs[service][indx];
+                    if (log.error == "ok") {
+                        success += 1;
+                    } else {
+                        fail += 1;
+                    }
+                }
+                $("#" + service).innerHTML = logs[service]?logs[service].length:"0";
+                $("#" + service).setAttribute("title", JSON.stringify({ "success": success, "fail": fail },null,2));
+                $("#" + service).setAttribute("temp", JSON.stringify(logs[service],null,2));
+                $("#" + service).style.backgroundColor = `rgb(${parseInt(30*(fail/success+fail))},${parseInt(100*(success/success+fail))},0)`;
+            }
+        }
+        updateApiInteractionCounts();
+        setInterval(() => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    logs = JSON.parse(xhttp.responseText);
+                    setTimeout(()=>{
+                        updateApiInteractionCounts();
+                    },1000);
+                }
+            };
+            clearApiInteractionCounts();
+            xhttp.open("GET", "/", true);
+            xhttp.send();
+        }, 5000);
     </script>
 </body>
+
 </html>
