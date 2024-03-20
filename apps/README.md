@@ -7,4 +7,6 @@
 
 All the above apps can be started by running step0.sh to step4.sh in windows these can be renamed to .bat files and can be run.
 
+This is the UI from the apiInteraction application the green colored numbers shows the hit count between its diaginally opposite services
+
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/b6f003f6-9985-4d64-9141-755a149e1534)
