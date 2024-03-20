@@ -1,29 +1,28 @@
+let apiInteractionModule = require("./apiInteractionModule");
+let apiInteractionUrl=null;
 const http = require('http');
 let PORT = 9998;
-let dbHost = null;
-let dbPort = null;
-if (process.argv.length >= 4) {
-    dbHost = process.argv[2];
-    dbPort = parseInt(process.argv[3]);
-    if (process.argv.length == 5) {
-        let p = parseInt(process.argv[4]);
-        if (p > 1000) {
-            PORT = p;
-            console.log("PORT updated " + PORT);
-        } else {
-            console.log("Swtched to default PORT " + PORT);
-        }
-        listenForCalls();
-    } else {
-        console.log("Swtched to default PORT " + PORT);
-        listenForCalls();
+let dbUrl = null;
+for(let i=0;i<process.argv.length;i++) {
+    let arg = process.argv[i];
+    if(arg.indexOf("PORT=")==0) {
+        PORT = parseInt(arg.replace("PORT=",""));
+    } else if(arg.indexOf("dbUrl=")==0) {
+        dbUrl = arg.replace("dbUrl=","");
+    } else if(arg.indexOf("interactionServer=")==0) {
+        apiInteractionUrl=arg.replace("interactionServer=","");
+        console.log("API interaction enabled, will send requests to "+apiInteractionUrl);
     }
+}
+console.log(`Using PORT ${PORT}`);
+
+if (dbUrl!=null) {
+    listenForCalls();
 } else {
     console.log("db host and port required");
 }
 
 async function listenForCalls() {
-    const dbUrl = 'http://' + dbHost + ":" + dbPort;
     let server = http.createServer((req, res) => {
         if(req.url.indexOf("/health")==0) {
             res.end("OK");
@@ -38,7 +37,7 @@ async function listenForCalls() {
         }
     });
     server.listen(PORT, () => {
-        console.log(`listening on PORT ${PORT}, dbUrl is: ${dbUrl}`);
+        console.log(`listening on PORT ${PORT} processid ${process.pid}, dbUrl is: ${dbUrl}`);
     });
 }
 
@@ -50,10 +49,12 @@ function callApi(apiUrl) {
                 data += chunk;
             });
             res.on('end', () => {
+                apiInteractionModule.saveInteraction(apiInteractionUrl,"RegisterService","Db",apiUrl,"ok");
                 resolve(data);
             });
         });
         req.on('error', (error) => {
+            apiInteractionModule.saveInteraction(apiInteractionUrl,"RegisterService","Db",apiUrl,error);
             resolve(error);
         });
     });

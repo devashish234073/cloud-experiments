@@ -1,16 +1,12 @@
 let http = require("http");
 let PORT = 9999;
-if(process.argv.length==3) {
-    let p = parseInt(process.argv[2]);
-    if(p>1000) {
-        PORT = p;
-        console.log("PORT updated "+PORT);
-    } else {
-        console.log("Swtched to default PORT "+PORT);
+for(let i=0;i<process.argv.length;i++) {
+    let arg = process.argv[i];
+    if(arg.indexOf("PORT=")==0) {
+        PORT = parseInt(arg.replace("PORT=",""));
     }
-} else {
-    console.log("Swtched to default PORT "+PORT);
 }
+console.log(`Using PORT ${PORT}`);
 let data = {"1":{"id":1,"name":"Devashish Priyadarshi"},"2":{"id":2,"name":"Hritik Roushan"}};
 let server = http.createServer((req,res)=>{
     if(req.url.indexOf("/health")==0) {
@@ -52,5 +48,5 @@ let server = http.createServer((req,res)=>{
 });
 
 server.listen(PORT,()=>{
-    console.log(`listening on PORT ${PORT}`);
+    console.log(`listening on PORT ${PORT} processid ${process.pid}`);
 });

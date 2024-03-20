@@ -1,0 +1,1 @@
+node registerService.js dbUrl=http://localhost:8989 PORT=7777 interactionServer=http://localhost:8988
