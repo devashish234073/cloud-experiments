@@ -10,3 +10,7 @@ All the above apps can be started by running step0.sh to step4.sh in windows the
 This is the UI from the apiInteraction application the green colored numbers shows the hit count between its diaginally opposite services
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/b6f003f6-9985-4d64-9141-755a149e1534)
+
+Clicking on the number shows details below and hovering over them shows success and failure count, here search service was killed as a result count of request going to serachService increased but calls to db did not:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/779ffdc4-7839-4ee3-896e-9f4dce186130)
