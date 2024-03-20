@@ -112,7 +112,7 @@ function listenForCalls() {
 
 function callApi(apiUrl) {
     return new Promise((resolve) => {
-        let dest = apiUrl.indexOf("registerUser")>-1?"RegisterService":"SearchService";
+        let dest = apiUrl.indexOf("saveUser?")>-1?"RegisterService":"SearchService";
         const req = http.get(apiUrl, (res) => {
             let data = '';
             res.on('data', (chunk) => {

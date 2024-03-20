@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Interactions</title>
+    <style>
+        button {
+            height:80px;
+            width:80px;
+            border-radius: 40px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-left:auto;
+            margin-right:auto;
+        }
+        table td {
+            border: 1px solid gray;
+        }
+        td[id] {
+            background-color: green;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td></td><td></td><td><button>Register Service</button></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td></td><td id="UI__RegisterService"></td><td></td><td id="RegisterService__Db"></td><td></td>
+        </tr>
+        <tr>
+            <td><button>UI</button></td><td></td><td></td><td></td><td><button>Db</button></td>
+        </tr>
+        <tr>
+            <td></td><td id="UI__SearchService"></td><td></td><td id="SearchService__Db"></td><td></td>
+        </tr>
+        <tr>
+            <td></td><td></td><td><button>Search Service</button></td><td></td><td></td>
+        </tr>
+    </table>
+    <script>
+        function $(selector) {
+            return document.querySelector(selector);
+        }
+        let logs = __DATA__;
+        let services = ["RegisterService__Db","SearchService__Db","UI__RegisterService","UI__SearchService"];
+        for(let serIndx in services) {
+            let service = services[serIndx];
+            $("#"+service).innerText = logs[service].length;
+        }
+    </script>
+</body>
+</html>

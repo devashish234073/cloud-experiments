@@ -1,4 +1,5 @@
 let http = require("http");
+let fs = require("fs");
 let PORT = 9995;
 for(let i=0;i<process.argv.length;i++) {
     let arg = process.argv[i];
@@ -15,6 +16,15 @@ let server = http.createServer((req,res)=>{
         res.end("OK");
     } else if(req.url=="/" || req.url=="/showAll") {
         res.end(JSON.stringify(logs));
+    } else if(req.url=="/ui") {
+        fs.readFile("ui/logInteraction.html",(err,data)=>{
+            if(err) {
+                res.end(err);
+            } else {
+                let html = String(data).replace("__DATA__",JSON.stringify(logs));
+                res.end(html);
+            }
+        });
     } else if(req.url.indexOf("/log?")==0) {
         let query = req.url.replace("/log?","");
         let map = {};
