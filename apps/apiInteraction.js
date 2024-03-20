@@ -33,13 +33,13 @@ let server = http.createServer((req,res)=>{
         if(map["serviceName"] && map["apiUrl"] && map["destinationServiceName"]) {
             let key = map["serviceName"]+"__"+map["destinationServiceName"];
             if(logs[key]) {
-                logs[key].push({"url":map["apiUrl"],"error":map["error"]});
+                logs[key].push({"url":map["apiUrl"].split("___").join("=").split("__").join("?"),"error":map["error"]});
             } else {
-                logs[key] = [{"url":map["apiUrl"],"error":map["error"]}];
+                logs[key] = [{"url":map["apiUrl"].split("___").join("=").split("__").join("?"),"error":map["error"]}];
             }
             res.end("saved");
         } else {
-            console.log("err0");
+            console.log("err0 serviceName:"+map["serviceName"]+",apiUrl:"+map["apiUrl"]+",dest:"+map["destinationServiceName"]);
             res.end("");
         }
     } else {

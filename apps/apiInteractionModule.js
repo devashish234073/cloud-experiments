@@ -4,7 +4,7 @@ function saveInteraction(apiInteractoionServiceUrl,sourceServiceName,destination
     if(apiInteractoionServiceUrl==null) {
         return;
     }
-    callApi(`${apiInteractoionServiceUrl}/log?serviceName=${sourceServiceName}&apiUrl=${apiPath.replace("http://","").replace("https://","")}&destinationServiceName=${destinationServiceName}&error=${error}`).then((data)=>{
+    callApi(`${apiInteractoionServiceUrl}/log?serviceName=${sourceServiceName}&apiUrl=${apiPath.replace("http://","").replace("https://","").replace("?","__").split("=").join("___")}&destinationServiceName=${destinationServiceName}&error=${error}`).then((data)=>{
         console.log(data=="saved");
     });
 }
