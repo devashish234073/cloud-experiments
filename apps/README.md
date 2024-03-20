@@ -14,3 +14,7 @@ This is the UI from the apiInteraction application the green colored numbers sho
 Clicking on the number shows details below and hovering over them shows success and failure count, here search service was killed as a result count of request going to serachService increased but calls to db did not:
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/779ffdc4-7839-4ee3-896e-9f4dce186130)
+
+"error":"ok" are the success ones , anything other than that is an error as shown below:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/9b8a4610-7a1b-4dbd-96e2-c669eefb6f07)
