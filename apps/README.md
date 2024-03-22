@@ -31,5 +31,7 @@ The logInteraction application can be accessed at PORT 8988 with public IP of th
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/f3e9abf4-44bc-4e6f-b0d9-f523389ee69a)
 
+More details on usage can be found here --> https://www.linkedin.com/posts/devashish-priyadarshi-96554112b_created-a-cloudformation-template-that-launches-activity-7176769830128164864-pxMW?utm_source=share&utm_medium=member_desktop
+
 
 
