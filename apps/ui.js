@@ -44,7 +44,7 @@ function listenForCalls() {
                 } else {
                     let html = String(data);
                     if(apiInteractionUrl) {
-                        html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px"src="${apiInteractionUrl}/ui"></iframe>`);
+                        html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px"src="${apiInteractionUrl}/ui"></iframe><br><a href="${apiInteractionUrl}" title="iframe requires https url or a local url if app is deployed in a server and IP is used it will not be accessible">Use this link if log interaction does not open above</a>`);
                     } else {
                         html=html.replace("__INTERACTION_UI__","");
                     }
