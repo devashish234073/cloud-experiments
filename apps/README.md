@@ -18,3 +18,18 @@ Clicking on the number shows details below and hovering over them shows success 
 "error":"ok" are the success ones , anything other than that is an error as shown below:
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/9b8a4610-7a1b-4dbd-96e2-c669eefb6f07)
+
+Added a cloudformation-all-public.json file that launches all these 5 applications in 5 different ec2 instances each with public IPs:
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/09c14711-636d-467f-9993-80c6fcb96ec9)
+
+The UI application can be accessed at port 8995 with the public IP of the "uiEC2" instance.
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/00ab1782-2656-4c59-a44a-09a622d6d0d4)
+
+The logInteraction application can be accessed at PORT 8988 with public IP of the "logInteractionEc2" instance.
+
+![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/f3e9abf4-44bc-4e6f-b0d9-f523389ee69a)
+
+
+
