@@ -43,10 +43,10 @@ function listenForCalls() {
                     res.end("Error occured");
                 } else {
                     let html = String(data);
-                    if(apiInteractionUrl) {
-                        html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px"src="${apiInteractionUrl}/ui"></iframe><br><a style="width:97%" href="${apiInteractionUrl}" title="iframe requires https url or a local url if app is deployed in a server and IP is used it will not be accessible">Use this link if log interaction does not open above</a>`);
+                    if(apiInteractionUrl && apiInteractionUrl.indexOf("localhost")>-1) {
+                        html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px"src="${apiInteractionUrl}/ui"></iframe>`);
                     } else {
-                        html=html.replace("__INTERACTION_UI__","");
+                        html=html.replace("__INTERACTION_UI__","Open log interaction manually running on PORT "+apiInteractionUrl.split(":")[1]);
                     }
                     res.end(html);
                 }
@@ -87,10 +87,10 @@ function listenForCalls() {
                         res.end("Error occured");
                     } else {
                         let html = String(data);
-                        if(apiInteractionUrl) {
+                        if(apiInteractionUrl && apiInteractionUrl.indexOf("localhost")>-1) {
                             html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px" src="${apiInteractionUrl}/ui"></iframe>`);
                         } else {
-                            html=html.replace("__INTERACTION_UI__","");
+                            html=html.replace("__INTERACTION_UI__","Open log interaction manually running on PORT "+apiInteractionUrl.split(":")[1]);
                         }
                         res.end(html);
                     }
