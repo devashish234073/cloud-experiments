@@ -46,7 +46,7 @@ function listenForCalls() {
                     if(apiInteractionUrl && apiInteractionUrl.indexOf("localhost")>-1) {
                         html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px"src="${apiInteractionUrl}/ui"></iframe>`);
                     } else {
-                        html=html.replace("__INTERACTION_UI__","Open log interaction manually running on PORT "+apiInteractionUrl.split(":")[1]);
+                        html=html.replace("__INTERACTION_UI__","Open log interaction manually running on PORT "+apiInteractionUrl.split(":")[2]);
                     }
                     res.end(html);
                 }
@@ -90,7 +90,7 @@ function listenForCalls() {
                         if(apiInteractionUrl && apiInteractionUrl.indexOf("localhost")>-1) {
                             html=html.replace("__INTERACTION_UI__",`<iframe width="385px" height="300px" src="${apiInteractionUrl}/ui"></iframe>`);
                         } else {
-                            html=html.replace("__INTERACTION_UI__","Open log interaction manually running on PORT "+apiInteractionUrl.split(":")[1]);
+                            html=html.replace("__INTERACTION_UI__","Open log interaction manually running on PORT "+apiInteractionUrl.split(":")[2]);
                         }
                         res.end(html);
                     }
