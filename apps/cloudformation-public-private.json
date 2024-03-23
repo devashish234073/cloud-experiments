@@ -286,6 +286,18 @@
             {
               "IpProtocol": "-1",
               "CidrIp": "0.0.0.0/0"
+            },
+            {
+              "IpProtocol": "tcp",
+              "FromPort": 8989,
+              "ToPort": 8989,
+              "CidrIp": "0.0.0.0/0"
+            },
+            {
+              "IpProtocol": "tcp",
+              "FromPort": 7777,
+              "ToPort": 7778,
+              "CidrIp": "0.0.0.0/0"
             }
           ]
         }
@@ -305,9 +317,15 @@
               "CidrIp": "0.0.0.0/0"
             },
             {
+              "IpProtocol": "icmp",
+              "FromPort": -1,
+              "ToPort": -1,
+              "SourceSecurityGroupId": { "Ref": "PublicSecurityGroup" }
+            },
+            {
               "IpProtocol": "tcp",
-              "FromPort": 8988,
-              "ToPort": 8988,
+              "FromPort": 8989,
+              "ToPort": 8989,
               "SourceSecurityGroupId": { "Ref": "PublicSecurityGroup" }
             },
             {
