@@ -68,7 +68,7 @@
               },
               "GroupSet": [
                 {
-                  "Ref": "MySecurityGroup"
+                  "Ref": "PublicSecurityGroup"
                 }
               ]
             }
@@ -105,15 +105,15 @@
           "NetworkInterfaces": [
             {
               "DeviceIndex": "0",
-              "PrivateIpAddress": "10.0.1.11",
-              "AssociatePublicIpAddress": "true",
+              "PrivateIpAddress": "10.0.9.11",
+              "AssociatePublicIpAddress": "false",
               "DeleteOnTermination": "true",
               "SubnetId": {
-                "Ref": "cfSubnet1"
+                "Ref": "cfSubnet2"
               },
               "GroupSet": [
                 {
-                  "Ref": "MySecurityGroup"
+                  "Ref": "PrivateSecurityGroup"
                 }
               ]
             }
@@ -138,7 +138,7 @@
                     "node -v\n",
                     "git clone https://github.com/devashish234073/cloud-experiments\n",
                     "cd cloud-experiments/apps\n",
-                    "node registerService.js dbUrl=http://10.0.1.11:8989 PORT=7777 interactionServer=http://10.0.1.10:8988&\n"
+                    "node registerService.js dbUrl=http://10.0.9.11:8989 PORT=7777 interactionServer=http://10.0.1.10:8988&\n"
                   ]
                 ]
             }
@@ -150,15 +150,15 @@
           "NetworkInterfaces": [
             {
               "DeviceIndex": "0",
-              "PrivateIpAddress": "10.0.1.12",
-              "AssociatePublicIpAddress": "true",
+              "PrivateIpAddress": "10.0.9.12",
+              "AssociatePublicIpAddress": "false",
               "DeleteOnTermination": "true",
               "SubnetId": {
-                "Ref": "cfSubnet1"
+                "Ref": "cfSubnet2"
               },
               "GroupSet": [
                 {
-                  "Ref": "MySecurityGroup"
+                  "Ref": "PrivateSecurityGroup"
                 }
               ]
             }
@@ -183,7 +183,7 @@
                     "node -v\n",
                     "git clone https://github.com/devashish234073/cloud-experiments\n",
                     "cd cloud-experiments/apps\n",
-                    "node searchService.js dbUrl=http://10.0.1.11:8989 PORT=7778 interactionServer=http://10.0.1.10:8988&\n"
+                    "node searchService.js dbUrl=http://10.0.9.11:8989 PORT=7778 interactionServer=http://10.0.1.10:8988&\n"
                   ]
                 ]
             }
@@ -195,15 +195,15 @@
           "NetworkInterfaces": [
             {
               "DeviceIndex": "0",
-              "PrivateIpAddress": "10.0.1.13",
-              "AssociatePublicIpAddress": "true",
+              "PrivateIpAddress": "10.0.9.13",
+              "AssociatePublicIpAddress": "false",
               "DeleteOnTermination": "true",
               "SubnetId": {
-                "Ref": "cfSubnet1"
+                "Ref": "cfSubnet2"
               },
               "GroupSet": [
                 {
-                  "Ref": "MySecurityGroup"
+                  "Ref": "PrivateSecurityGroup"
                 }
               ]
             }
@@ -228,7 +228,7 @@
                     "node -v\n",
                     "git clone https://github.com/devashish234073/cloud-experiments\n",
                     "cd cloud-experiments/apps\n",
-                    "node ui.js registerServiceUrl=http://10.0.1.12:7777 searchServiceUrl=http://10.0.1.13:7778 PORT=8995 interactionServer=http://10.0.1.10:8988&\n"
+                    "node ui.js registerServiceUrl=http://10.0.9.12:7777 searchServiceUrl=http://10.0.9.13:7778 PORT=8995 interactionServer=http://10.0.1.10:8988&\n"
                   ]
                 ]
             }
@@ -248,14 +248,14 @@
               },
               "GroupSet": [
                 {
-                  "Ref": "MySecurityGroup"
+                  "Ref": "PublicSecurityGroup"
                 }
               ]
             }
           ]
         }
       },
-      "MySecurityGroup": {
+      "PublicSecurityGroup": {
         "Type": "AWS::EC2::SecurityGroup",
         "Properties": {
           "VpcId": {
@@ -277,27 +277,50 @@
             },
             {
               "IpProtocol": "tcp",
-              "FromPort": 8989,
-              "ToPort": 8989,
+              "FromPort": 8995,
+              "ToPort": 8995,
               "CidrIp": "0.0.0.0/0"
+            }
+          ],
+          "SecurityGroupEgress": [
+            {
+              "IpProtocol": "-1",
+              "CidrIp": "0.0.0.0/0"
+            }
+          ]
+        }
+      },
+      "PrivateSecurityGroup": {
+        "Type": "AWS::EC2::SecurityGroup",
+        "Properties": {
+          "VpcId": {
+            "Ref": "cfVPC"
+          },
+          "GroupDescription": "Allow SSH and HTTP traffic",
+          "SecurityGroupIngress": [
+            {
+              "IpProtocol": "tcp",
+              "FromPort": 22,
+              "ToPort": 22,
+              "CidrIp": "0.0.0.0/0"
+            },
+            {
+              "IpProtocol": "tcp",
+              "FromPort": 8988,
+              "ToPort": 8988,
+              "SourceSecurityGroupId": { "Ref": "PublicSecurityGroup" }
             },
             {
               "IpProtocol": "tcp",
               "FromPort": 7777,
               "ToPort": 7777,
-              "CidrIp": "0.0.0.0/0"
+              "SourceSecurityGroupId": { "Ref": "PublicSecurityGroup" }
             },
             {
               "IpProtocol": "tcp",
               "FromPort": 7778,
               "ToPort": 7778,
-              "CidrIp": "0.0.0.0/0"
-            },
-            {
-              "IpProtocol": "tcp",
-              "FromPort": 8995,
-              "ToPort": 8995,
-              "CidrIp": "0.0.0.0/0"
+              "SourceSecurityGroupId": { "Ref": "PublicSecurityGroup" }
             }
           ],
           "SecurityGroupEgress": [
@@ -352,6 +375,67 @@
           },
           "RouteTableId": {
             "Ref": "PublicRouteTable"
+          }
+        }
+      },
+      "NATGateway" : {
+        "Type" : "AWS::EC2::NatGateway",
+        "Properties" : {
+           "AllocationId" : { 
+               "Fn::GetAtt" : ["NATGatewayEIP", "AllocationId"] 
+           },
+           "SubnetId" : { 
+               "Ref" : "cfSubnet1" 
+           },
+           "Tags" : [ 
+               {"Key" : "stack", "Value" : "dev" } 
+           ]
+          }
+     },
+     "NATGatewayEIP" : {
+        "Type" : "AWS::EC2::EIP",
+        "Properties" : {
+           "Domain" : "vpc"
+        }
+     },
+     "RouteNATGateway" : {
+        "DependsOn": [ "GatewayAttachment","NATGateway" ],
+        "Type" : "AWS::EC2::Route",
+        "Properties" : {
+           "RouteTableId" : { "Ref" : "PrivateRouteTable" },
+           "DestinationCidrBlock" : "0.0.0.0/0",
+           "NatGatewayId" : { "Ref" : "NATGateway" }
+        }
+      },
+      "PrivateRouteTable": {
+        "Type": "AWS::EC2::RouteTable",
+        "Properties": {
+          "VpcId": {
+            "Ref": "cfVPC"
+          }
+        }
+      },
+      "PrivateRoute": {
+        "Type": "AWS::EC2::Route",
+        "DependsOn": "GatewayAttachment",
+        "Properties": {
+          "RouteTableId": {
+            "Ref": "PrivateRouteTable"
+          },
+          "DestinationCidrBlock": "10.0.1.0/24",
+          "InstanceId": {
+            "Ref": "searchServiceEC2"
+          }
+        }
+      },
+      "PrivateSubnet2RouteTableAssociation": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": {
+            "Ref": "cfSubnet2"
+          },
+          "RouteTableId": {
+            "Ref": "PrivateRouteTable"
           }
         }
       },
