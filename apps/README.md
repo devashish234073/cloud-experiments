@@ -33,5 +33,12 @@ The logInteraction application can be accessed at PORT 8988 with public IP of th
 
 More details on usage can be found here --> https://www.linkedin.com/posts/devashish-priyadarshi-96554112b_created-a-cloudformation-template-that-launches-activity-7176769830128164864-pxMW?utm_source=share&utm_medium=member_desktop
 
+Added two more cloudformation template one where the UI and logInteraction instance is only left in private sunet and rest are moved to private subnet
 
+And the second cloudformation template adds a loadbalancer on the top of the ui and logInteraction servers.
+
+The videos explaining both :
+
+1. https://www.youtube.com/watch?v=c9mVh61O9iA
+2. https://www.youtube.com/watch?v=wQNMNhW4ADQ
 
