@@ -1,0 +1,619 @@
+{
+    "Resources": {
+        "cfVPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": "172.91.0.0/16",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "cloudformationVPC"
+                    }
+                ]
+            }
+        },
+        "cfSubnet1": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "cfVPC"
+                },
+                "CidrBlock": "172.91.1.0/24",
+                "MapPublicIpOnLaunch": true,
+                "AvailabilityZone": "ap-south-1a",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "cloudformation-subnet-1-ap-south-1a"
+                    }
+                ]
+            }
+        },
+        "cfSubnet2": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "cfVPC"
+                },
+                "CidrBlock": "172.91.9.0/24",
+                "MapPublicIpOnLaunch": true,
+                "AvailabilityZone": "ap-south-1b",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "cloudformation-subnet-2-ap-south-1b"
+                    }
+                ]
+            }
+        },
+        "cfIgw": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "cloudformation-igw"
+                    }
+                ]
+            }
+        },
+        "AttachGateway": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "cfVPC"
+                },
+                "InternetGatewayId": {
+                    "Ref": "cfIgw"
+                }
+            }
+        },
+        "cfRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "cfVPC"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "cloudformationRouteTable"
+                    }
+                ]
+            }
+        },
+        "cfRouteToIgw": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": "AttachGateway",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "cfRouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "cfIgw"
+                }
+            }
+        },
+        "routeTableSubnet1Association": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "cfSubnet1"
+                },
+                "RouteTableId": {
+                    "Ref": "cfRouteTable"
+                }
+            }
+        },
+        "cfRouteTablePrivate": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "cfVPC"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "cloudformationRouteTablePrivate"
+                    }
+                ]
+            }
+        },
+        "NATGateway": {
+            "Type": "AWS::EC2::NatGateway",
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "NATGatewayEIP",
+                        "AllocationId"
+                    ]
+                },
+                "SubnetId": {
+                    "Ref": "cfSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "stack",
+                        "Value": "dev"
+                    }
+                ]
+            }
+        },
+        "NATGatewayEIP": {
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "Domain": "vpc"
+            }
+        },
+        "cfRouteToNatGw": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": "AttachGateway",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "cfRouteTablePrivate"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "NatGatewayId": {
+                    "Ref": "NATGateway"
+                }
+            }
+        },
+        "routeTableSubnet2Association": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "cfSubnet2"
+                },
+                "RouteTableId": {
+                    "Ref": "cfRouteTablePrivate"
+                }
+            }
+        },
+        "cfSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Allow local connections",
+                "VpcId": {
+                    "Ref": "cfVPC"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 22,
+                        "ToPort": 22,
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "172.91.0.0/16",
+                        "Description": "Allow all traffic within the VPC"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 8988,
+                        "ToPort": 8988,
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 8995,
+                        "ToPort": 8995,
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "cloudformation-security-group"
+                    }
+                ]
+            }
+        },
+        "logInteractionEc2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": "ami-03f4878755434977f",
+                "InstanceType": "t2.nano",
+                "KeyName": "kp1",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "apt update -y\n",
+                                "apt install git -y\n",
+                                "apt install nodejs -y\n",
+                                "node -v\n",
+                                "git clone https://github.com/devashish234073/cloud-experiments\n",
+                                "cd cloud-experiments/apps\n",
+                                "node apiInteraction.js PORT=8988&\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "logInteractionEc2"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "PrivateIpAddress": "172.91.1.10",
+                        "AssociatePublicIpAddress": "true",
+                        "DeleteOnTermination": "true",
+                        "SubnetId": {
+                            "Ref": "cfSubnet1"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "cfSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "uiEC2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": "ami-03f4878755434977f",
+                "InstanceType": "t2.nano",
+                "KeyName": "kp1",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "function check_internet() {\n",
+                                "  wget -q --spider http://www.google.com\n",
+                                "  if [ $? -eq 0 ]; then\n",
+                                "    echo 'Internet is available'\n",
+                                "    return 0\n",
+                                "  else\n",
+                                "    echo 'Internet is not available, retrying in 30 seconds...'\n",
+                                "    sleep 30\n",
+                                "    return 1\n",
+                                "  fi\n",
+                                "}\n",
+                                "while ! check_internet; do\n",
+                                "  continue\n",
+                                "done\n",
+                                "apt update -y\n",
+                                "apt install git -y\n",
+                                "apt install nodejs -y\n",
+                                "node -v\n",
+                                "git clone https://github.com/devashish234073/cloud-experiments\n",
+                                "cd cloud-experiments/apps\n",
+                                "node ui.js registerServiceUrl=http://172.91.9.12:7777 searchServiceUrl=http://172.91.9.13:7778 PORT=8995 interactionServer=http://172.91.1.10:8988&\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "uiEC2"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "PrivateIpAddress": "172.91.9.14",
+                        "AssociatePublicIpAddress": "false",
+                        "DeleteOnTermination": "true",
+                        "SubnetId": {
+                            "Ref": "cfSubnet2"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "cfSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "dbEc2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": "ami-03f4878755434977f",
+                "InstanceType": "t2.nano",
+                "KeyName": "kp1",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "function check_internet() {\n",
+                                "  wget -q --spider http://www.google.com\n",
+                                "  if [ $? -eq 0 ]; then\n",
+                                "    echo 'Internet is available'\n",
+                                "    return 0\n",
+                                "  else\n",
+                                "    echo 'Internet is not available, retrying in 30 seconds...'\n",
+                                "    sleep 30\n",
+                                "    return 1\n",
+                                "  fi\n",
+                                "}\n",
+                                "while ! check_internet; do\n",
+                                "  continue\n",
+                                "done\n",
+                                "apt update -y\n",
+                                "apt install git -y\n",
+                                "apt install nodejs -y\n",
+                                "node -v\n",
+                                "git clone https://github.com/devashish234073/cloud-experiments\n",
+                                "cd cloud-experiments/apps\n",
+                                "node db.js PORT=8989&\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "dbEc2"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "PrivateIpAddress": "172.91.9.11",
+                        "AssociatePublicIpAddress": "false",
+                        "DeleteOnTermination": "true",
+                        "SubnetId": {
+                            "Ref": "cfSubnet2"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "cfSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "registerServiceEC2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": "ami-03f4878755434977f",
+                "InstanceType": "t2.nano",
+                "KeyName": "kp1",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "function check_internet() {\n",
+                                "  wget -q --spider http://www.google.com\n",
+                                "  if [ $? -eq 0 ]; then\n",
+                                "    echo 'Internet is available'\n",
+                                "    return 0\n",
+                                "  else\n",
+                                "    echo 'Internet is not available, retrying in 30 seconds...'\n",
+                                "    sleep 30\n",
+                                "    return 1\n",
+                                "  fi\n",
+                                "}\n",
+                                "while ! check_internet; do\n",
+                                "  continue\n",
+                                "done\n",
+                                "apt update -y\n",
+                                "apt install git -y\n",
+                                "apt install nodejs -y\n",
+                                "node -v\n",
+                                "git clone https://github.com/devashish234073/cloud-experiments\n",
+                                "cd cloud-experiments/apps\n",
+                                "node registerService.js dbUrl=http://172.91.9.11:8989 PORT=7777 interactionServer=http://172.91.1.10:8988&\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "registerServiceEC2"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "PrivateIpAddress": "172.91.9.12",
+                        "AssociatePublicIpAddress": "false",
+                        "DeleteOnTermination": "true",
+                        "SubnetId": {
+                            "Ref": "cfSubnet2"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "cfSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "searchServiceEC2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": "ami-03f4878755434977f",
+                "InstanceType": "t2.nano",
+                "KeyName": "kp1",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "function check_internet() {\n",
+                                "  wget -q --spider http://www.google.com\n",
+                                "  if [ $? -eq 0 ]; then\n",
+                                "    echo 'Internet is available'\n",
+                                "    return 0\n",
+                                "  else\n",
+                                "    echo 'Internet is not available, retrying in 30 seconds...'\n",
+                                "    sleep 30\n",
+                                "    return 1\n",
+                                "  fi\n",
+                                "}\n",
+                                "while ! check_internet; do\n",
+                                "  continue\n",
+                                "done\n",
+                                "apt update -y\n",
+                                "apt install git -y\n",
+                                "apt install nodejs -y\n",
+                                "node -v\n",
+                                "git clone https://github.com/devashish234073/cloud-experiments\n",
+                                "cd cloud-experiments/apps\n",
+                                "node searchService.js dbUrl=http://172.91.9.11:8989 PORT=7778 interactionServer=http://172.91.1.10:8988&\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "searchServiceEC2"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "PrivateIpAddress": "172.91.9.13",
+                        "AssociatePublicIpAddress": "false",
+                        "DeleteOnTermination": "true",
+                        "SubnetId": {
+                            "Ref": "cfSubnet2"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "cfSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "targetGroupForUIEC2": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "Properties": {
+              "Name": "targetGroupForUIEC2",
+              "Port": 8995,
+              "Protocol": "HTTP",
+              "Targets": [
+                {
+                  "Id": {
+                    "Ref": "uiEC2"
+                  }
+                }
+              ],
+              "VpcId": {
+                "Ref": "cfVPC"
+              },
+              "HealthCheckEnabled": true,
+              "HealthCheckPath": "/health",
+              "HealthCheckPort": "8995"
+            }
+        },
+        "targetGroupForLogInteractionEC2": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "Properties": {
+              "Name": "targetGroupForLogInteractionEC2",
+              "Port": 8988,
+              "Protocol": "HTTP",
+              "Targets": [
+                {
+                  "Id": {
+                    "Ref": "logInteractionEc2"
+                  }
+                }
+              ],
+              "VpcId": {
+                "Ref": "cfVPC"
+              },
+              "HealthCheckEnabled": true,
+              "HealthCheckPath": "/health",
+              "HealthCheckPort": "8988"
+            }
+        },
+        "cfSecurityGroupForLb": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Allow local connections",
+                "VpcId": {
+                    "Ref": "cfVPC"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 80,
+                        "ToPort": 80,
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 8988,
+                        "ToPort": 8988,
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "cloudformation-security-group-for-lb"
+                    }
+                ]
+            }
+        },
+        "cfLoadBalancer": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties": {
+              "Name": "cfLoadBalancer",
+              "Subnets": [
+                { "Ref": "cfSubnet1" },
+                { "Ref": "cfSubnet2" }
+              ],
+              "SecurityGroups": [
+                { "Ref": "cfSecurityGroupForLb" }
+              ]
+            }
+          },
+          "cfLbListenerForUIEC2": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+              "DefaultActions": [
+                {
+                  "Type": "forward",
+                  "TargetGroupArn": { "Ref": "targetGroupForUIEC2" }
+                }
+              ],
+              "LoadBalancerArn": { "Ref": "cfLoadBalancer" },
+              "Port": 80,
+              "Protocol": "HTTP"
+            }
+        },
+        "cfLbListenerForLogInteractionEC2": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+              "DefaultActions": [
+                {
+                  "Type": "forward",
+                  "TargetGroupArn": { "Ref": "targetGroupForLogInteractionEC2" }
+                }
+              ],
+              "LoadBalancerArn": { "Ref": "cfLoadBalancer" },
+              "Port": 8988,
+              "Protocol": "HTTP"
+            }
+        }
+    }
+  }
