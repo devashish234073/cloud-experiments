@@ -33,6 +33,13 @@ Resources:
     Properties:
       Runtime: python3.10
       Handler: index.handler
+      Events:
+        getEndpoint:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: /
+            Method: POST
       InlineCode: |
         def handler(event, context):
             return {'body': 'Hello World!', 'statusCode': 200}
@@ -42,22 +49,22 @@ Resources:
     Properties:
       Name: !Join [ "", [ "test-api-gw-","dev"] ]
       StageName: 'prod'
-      DefinitionBody:
-        swagger: '2.0'
-        info:
-          title: 'My API'
-          version: '1.0'
-        paths:
-          /hello:
-            get:
-              responses:
-                '200':
-                  description: 'OK'
-              x-amazon-apigateway-integration:
-                httpMethod: GET
-                type: AWS_PROXY
-                uri:
-                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MyLambdaFunction.Arn}/invocations'
+      # DefinitionBody:
+      #   swagger: '2.0'
+      #   info:
+      #     title: 'My API'
+      #     version: '1.0'
+      #   paths:
+      #     /hello:
+      #       get:
+      #         responses:
+      #           '200':
+      #             description: 'OK'
+      #         x-amazon-apigateway-integration:
+      #           httpMethod: GET
+      #           type: AWS_PROXY
+      #           uri:
+      #             Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MyLambdaFunction.Arn}/invocations'
       Auth:
         DefaultAuthorizer: APIGWAuthorizer
         AddDefaultAuthorizerToCorsPreflight: false
