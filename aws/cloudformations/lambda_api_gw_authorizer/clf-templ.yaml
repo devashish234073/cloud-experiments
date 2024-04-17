@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  SwaggerBucket:
+    Type: String
+    Description: S3 bucket where the OpenAPI definition file is stored
+  LambdaFunctionArn:
+    Type: String
+    Description: ARN of the Lambda function
+
+Resources:
+  MyLambdaFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Runtime: python3.10
+      Handler: index.handler
+      InlineCode: |
+        def handler(event, context):
+            return {'body': 'Hello World!', 'statusCode': 200}
+  
+  MyApi:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: 'prod'
+      DefinitionBody:
+        Fn::Transform:
+          Name: 'AWS::Include'
+          Parameters:
+            Location: !Sub 's3://swagger-bucket-my/swagger.yml'
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          MetricsEnabled: true
+          DataTraceEnabled: true
+      Tags:
+        what: hello
+  
+  ApiGatewayLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Sub '/aws/api-gateway/${MyApi}/access-log'
+      RetentionInDays: 30
+      Tags:
+        - Key: 'Environment'
+          Value: 'Production'
+        - Key: 'Owner'
+          Value: 'MyTeam'
+  
+Outputs:
+  LambdaFunctionArn:
+    Description: 'ARN of the Lambda function'
+    Value: !GetAtt MyLambdaFunction.Arn
