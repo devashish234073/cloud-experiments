@@ -9,3 +9,6 @@ Images are stored by hitting the aws lambda which in turn saves the image to s3 
 
 ![image](https://github.com/devashish234073/cloud-experiments/assets/20777854/6d8c1be7-ba84-4b56-891e-2d00da509838)
 
+the lambda.mjs file will require an aws-sdk layer if used with nodejs runtime 18+. If using nodejs16 or below it will work without aws layer.
+
+FOr nodejs 18+ use the lambda-with-sdk-v3.mjs file
