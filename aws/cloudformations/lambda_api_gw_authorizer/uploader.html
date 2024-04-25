@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cam Surveillance</title>
+    <style>
+        button {
+            width: 100%;
+            border: none;
+            height: 30px;
+            color: white;
+        }
+
+        button:active {
+            color: black;
+        }
+
+        #startBtn {
+            background-color: green;
+        }
+
+        #stopBtn {
+            background-color: red;
+        }
+
+        button:disabled {
+            color: gray;
+            background-color: darkgray !important;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td colspan="3">
+                <h1>Cam Surveillance</h1>
+            </td>
+        </tr>
+        <tr>
+            <td>Backend Host</td>
+            <td colspan="2"><input type="text" id="host" value="localhost"></td>
+        </tr>
+        <tr>
+            <td>Backend Port</td>
+            <td colspan="2"><input type="number" id="port" value="3000"></td>
+        </tr>
+        <tr>
+            <td>Capture every</td>
+            <td colspan="2"><input type="number" id="delay" value="6"> seconds</td>
+        </tr>
+        <tr>
+            <td>Auth</td>
+            <td colspan="2"><select id="auth">
+                    <option>allow</option>
+                    <option>deny</option>
+                    <option>unauthorized</option>
+                    <option>no auths</option>
+                </select></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><button id="startBtn">Start</button></td>
+            <td><button id="stopBtn" disabled>Stop</button></td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td colspan="3">
+                <div id="errorDiv" style="color: red; margin-top: 10px;"></div>
+            </td>
+            <tr>
+                <td colspan="3">
+                    <div id="successDiv" style="color: green; margin-top: 10px;"></div>
+                </td>
+            </tr>
+        </tr>
+    </table>
+    <script>
+        function $(selector) {
+            return document.querySelector(selector);
+        }
+        var HOST = $("#host").value;
+        var PORT = $("#port").value;
+        function $(selector) {
+            return document.querySelector(selector);
+        }
+        var startBtn = $('#startBtn');
+        var stopBtn = $('#stopBtn');
+        var errorDiv = $('#errorDiv');
+        var successDiv = $('#successDiv');
+        var intervalId;
+
+        var startCapturing = function () {
+            HOST = $("#host").value;
+            PORT = $("#port").value;
+            intervalId = setInterval(captureImage, parseInt($("#delay").value * 1000));
+            disable(["#host", "#port", "#delay", "#startBtn"]);
+            enable(["#stopBtn"]);
+        }
+
+        var stopCapturing = function () {
+            enable(["#host", "#port", "#delay", "#startBtn"]);
+            disable(["#stopBtn"]);
+            clearInterval(intervalId);
+        };
+
+        function disable(selectors) {
+            for (var i = 0; i < selectors.length; i++) {
+                var selector = selectors[i];
+                $(selector).setAttribute("disabled", true);
+            }
+        }
+
+        function enable(selectors) {
+            for (var i = 0; i < selectors.length; i++) {
+                var selector = selectors[i];
+                $(selector).removeAttribute("disabled");
+            }
+        }
+
+        stopBtn.addEventListener('click', stopCapturing);
+        startBtn.addEventListener('click', startCapturing);
+
+        var video = document.createElement('video');
+        function captureImage() {
+            errorDiv.textContent = '';
+            successDiv.textContent = 'sending new image';
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((stream) => {
+                    video.srcObject = stream;
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        var canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        var imageData = canvas.toDataURL('image/jpeg');
+                        sendDataToAPI(imageData);
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                    };
+                })
+                .catch((error) => {
+                    console.error('Error accessing camera:', error);
+                    errorDiv.textContent = 'Error accessing camera. Please allow camera access and try again. ' + error;
+                });
+        }
+
+        function sendDataToAPI(imageData) {
+            let headr = {
+                'Content-Type': 'application/json'
+            };
+            let authVal = $("#auth").value;
+            if (authVal != "no auth") {
+                headr['Authorization'] = authVal;
+            }
+            fetch(HOST + (PORT != 80 && PORT != 443 ? ":" + PORT : ""), {
+                method: 'POST',
+                headers: headr,
+                body: JSON.stringify({ image: imageData }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text();
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response from API:', data);
+                    if(typeof data == 'string') {
+                        let error = JSON.parse(data);
+                        successDiv.textContent = "";
+                        errorDiv.textContent = JSON.stringify("Error: "+error.message);
+                    } else {
+                        errorDiv.textContent = "";
+                        successDiv.textContent = JSON.stringify(data);
+                    }
+                    if (data.delay && data.delay > 0 && data.delay != $("#delay").value) {
+                        console.log("delay changed remotely to " + data.delay + " seconds");
+                        stopCapturing();
+                        $("#delay").value = data.delay;
+                        startCapturing();
+                        console.log("restarted capturing..");
+                    }
+                })
+                .catch(error => {
+                    console.log("error", error);
+                    console.error('Error sending data to API:', error);
+                    errorDiv.textContent = 'Error sending image data to the server. Please try again later. ' + error;
+                });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,242 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Resources:
+  LambdaFuncRoleForAuthorizer:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "lambda.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "LambdaExecutionPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: !GetAtt MyLambdaFunction.Arn
+
+  MyLambdaFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Policies:
+        - S3CrudPolicy:
+            BucketName: my-bucket-for-xray
+      Events:
+        postEndpoint:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: /
+            Method: POST
+      InlineCode: |
+        import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+        const s3Client = new S3Client({ region: "ap-south-1" });
+
+        export const handler = async (event) => {
+          const imageData = JSON.parse(event.body).image;
+          console.log("imageData",imageData);
+          const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
+
+          const timestamp = Date.now().toString();
+          const fileName = `image_${timestamp}.jpeg`;
+          let delay = 10;
+
+          const params = {
+            Bucket: 'my-bucket-for-xray',
+            Key: fileName,
+            Body: Buffer.from(base64Data, 'base64'),
+            ContentType: 'image/jpeg' 
+          };
+          const responseHeaders = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
+          };
+          if (event.httpMethod === 'OPTIONS') {
+            return {
+              statusCode: 200,
+              headers: responseHeaders,
+              body: JSON.stringify({ message: 'CORS preflight success' }),
+            };
+          } else {
+            try {
+              const command = new PutObjectCommand(params);
+              await s3Client.send(command);
+              console.log('Image uploaded successfully:', fileName);
+              return { statusCode: 200, headers: responseHeaders, body: '{"status":"Image uploaded successfully","delay":'+delay+'}' };
+            } catch (error) {
+              console.error('Error uploading image to S3:', error);
+              return { statusCode: 500, headers: responseHeaders, body: '{"status":"Error uploading image"}' };
+            }
+          }
+        };
+
+
+
+  MyApi:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      Name: !Join [ "", [ "test-api-gw-","dev"] ]
+      StageName: 'dev'
+      GatewayResponses:
+        DEFAULT_4xx:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Headers: "'*'"
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Methods: "'*'"
+      # DefinitionBody:
+      #   swagger: '2.0'
+      #   info:
+      #     title: 'My API'
+      #     version: '1.0'
+      #   paths:
+      #     /hello:
+      #       get:
+      #         responses:
+      #           '200':
+      #             description: 'OK'
+      #         x-amazon-apigateway-integration:
+      #           httpMethod: GET
+      #           type: AWS_PROXY
+      #           uri:
+      #             Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MyLambdaFunction.Arn}/invocations'
+      Cors:
+        AllowMethods: "'GET,PUT,POST,DELETE,OPTIONS'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: APIGWAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          APIGWAuthorizer:
+            FunctionArn: !GetAtt AuthorizerForAPIGW.Arn
+            Identity:
+              ReAuthorizeEvery: 0
+        ResourcePolicy:
+          CustomStatements: 
+            - Effect: "Allow"
+              Principal: "*"
+              Action: "execute-api:Invoke"
+              Resource: "execute-api:/*"
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          MetricsEnabled: true
+          DataTraceEnabled: true
+      Tags:
+        what: hello
+  
+  ApiGatewayResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt: [MyApi, RootResourceId]
+      PathPart: "dev"
+      RestApiId:
+        Ref: MyApi
+
+  ApiGatewayMethodCors:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: "{\"StatusCode\": 200}"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+      ResourceId:
+        Ref: ApiGatewayResource
+      RestApiId:
+        Ref: MyApi
+
+  ApiGatewayLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Join [ "", [ "test-api-gw-log-grp-",!Ref MyApi,"/","dev"] ]
+      RetentionInDays: 30
+      Tags:
+        - Key: 'Environment'
+          Value: 'Production'
+        - Key: 'Owner'
+          Value: 'MyTeam'
+
+  AuthorizerForAPIGW:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "authorizer-for-api-gw"
+      Role: !GetAtt LambdaFuncRoleForAuthorizer.Arn
+      Handler: src/index.handler
+      Runtime: nodejs16.x
+      MemorySize: 320
+      Timeout: 20
+      InlineCode: |
+        exports.handler =  function(event, context, callback) {
+          console.log(event.httpMethod,event);
+          var token = event.authorizationToken;
+          switch (token) {
+            case 'allow':
+              callback(null, generatePolicy('user', 'Allow', event.methodArn));
+              break;
+            case 'deny':
+              callback(null, generatePolicy('user', 'Deny', event.methodArn));
+              break;
+            case 'unauthorized':
+              callback("Unauthorized");   // Return a 401 Unauthorized response
+              break;
+            default:
+              callback("Error: Invalid token"); // Return a 500 Invalid token response
+          }
+        };
+        var generatePolicy = function(principalId, effect, resource) {
+          var authResponse = {};  
+          authResponse.principalId = principalId;
+          if (effect && resource) {
+            var policyDocument = {};
+            policyDocument.Version = '2012-10-17'; 
+            policyDocument.Statement = [];
+            var statementOne = {};
+            statementOne.Action = 'execute-api:Invoke'; 
+            statementOne.Effect = effect;
+            statementOne.Resource = resource;
+            policyDocument.Statement[0] = statementOne;
+            authResponse.policyDocument = policyDocument;
+            console.log("statement",statementOne);
+            console.log("policyDocument",policyDocument);
+          }
+          authResponse.context = {
+            "stringKey": "stringval",
+            "numberKey": 123,
+            "booleanKey": true
+          };
+          return authResponse;
+        }
+        
