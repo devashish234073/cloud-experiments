@@ -56,7 +56,7 @@
             <td>Capture every</td>
             <td colspan="2"><input type="number" id="delay" value="6"> seconds</td>
         </tr>
-        <tr>
+        <tr hidden>
             <td>Directory</td>
             <td colspan="2"><input type="text" id="directoryFld"></td>
         </tr>
@@ -95,12 +95,12 @@
             HOST = $("#host").value;
             PORT = $("#port").value;
             intervalId = setInterval(captureImage, parseInt($("#delay").value * 1000));
-            disable(["#host","#port","#delay","#startBtn","#directoryFld"]);
+            disable(["#host","#port","#delay","#startBtn"]);
             enable(["#stopBtn"]);
         }
 
         var stopCapturing = function() {
-            enable(["#host","#port","#delay","#startBtn","#directoryFld"]);
+            enable(["#host","#port","#delay","#startBtn"]);
             disable(["#stopBtn"]);
             clearInterval(intervalId);
         };

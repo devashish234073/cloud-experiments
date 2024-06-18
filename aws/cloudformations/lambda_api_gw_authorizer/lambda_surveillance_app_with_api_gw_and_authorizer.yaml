@@ -5,7 +5,7 @@ Parameters:
   BucketName:
     Type: String
     Description: Name of the S3 bucket to which images will be sent
-    
+
 Resources:
   LambdaFuncRoleForAuthorizer:
     Type: "AWS::IAM::Role"
@@ -51,11 +51,14 @@ Resources:
 
         export const handler = async (event) => {
           const imageData = JSON.parse(event.body).image;
-          console.log("event",event);
+          console.log("event.headers",event.headers);
           const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
 
           const timestamp = Date.now().toString();
-          const fileName = `image_${timestamp}.jpeg`;
+          let fileName = `image_${timestamp}.jpeg`;
+          if(event.headers && event.headers.prefix) {
+              fileName = event.headers.prefix + fileName;
+          }
           let delay = 10;
 
           const params = {
