@@ -14,7 +14,7 @@
             background-color: black;
             color:green;
         }
-        
+
         button {
             width: 100%;
             border: none;
@@ -134,6 +134,15 @@
             }
         }
 
+        let totalCam = 0;
+        navigator.mediaDevices.enumerateDevices().then(function(devices) {
+            const videoInputDevices = devices.filter(device => device.kind === 'videoinput');
+            totalCam = videoInputDevices.length;
+        })
+        .catch(function(err) {
+            console.log(err.name + ": " + err.message);
+        });
+
         stopBtn.addEventListener('click', stopCapturing);
         startBtn.addEventListener('click', startCapturing);
         let directoryFld = $("#directoryFld");
@@ -154,11 +163,40 @@
                         var imageData = canvas.toDataURL('image/jpeg');
                         sendDataToAPI(imageData,directoryFld.value);
                         video.srcObject.getTracks().forEach(track => track.stop());
+                        setTimeout(()=>{
+                            if(totalCam>1) {
+                                captureImageRearCamera();
+                            }
+                        },1000);
                     };
                 })
                 .catch((error) => {
                     console.error('Error accessing camera:', error);
                     errorDiv.textContent = 'Error accessing camera. Please allow camera access and try again. ' + error;
+                });
+        }
+
+        function captureImageRearCamera() {
+            errorDiv.textContent = '';
+            successDiv.textContent = 'sending new image from rear camera';
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+                .then((stream) => {
+                    video.srcObject = stream;
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        var canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        var imageData = canvas.toDataURL('image/jpeg');
+                        sendDataToAPI(imageData,directoryFld.value);
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                    };
+                })
+                .catch((error) => {
+                    console.error('Error accessing rear camera:', error);
+                    errorDiv.textContent = 'Error accessing rear camera. Please allow camera access and try again. ' + error;
                 });
         }
 
