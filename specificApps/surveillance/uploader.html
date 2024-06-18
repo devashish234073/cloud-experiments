@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cam Surveillance</title>
     <style>
+        table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        body {
+            background-color: black;
+            color:green;
+        }
         button {
             width: 100%;
             border:none;
@@ -49,6 +57,10 @@
             <td colspan="2"><input type="number" id="delay" value="6"> seconds</td>
         </tr>
         <tr>
+            <td>Directory</td>
+            <td colspan="2"><input type="text" id="directoryFld"></td>
+        </tr>
+        <tr>
             <td></td>
             <td><button id="startBtn">Start</button></td>
             <td><button id="stopBtn" disabled>Stop</button></td>
@@ -83,12 +95,12 @@
             HOST = $("#host").value;
             PORT = $("#port").value;
             intervalId = setInterval(captureImage, parseInt($("#delay").value * 1000));
-            disable(["#host","#port","#delay","#startBtn"]);
+            disable(["#host","#port","#delay","#startBtn","#directoryFld"]);
             enable(["#stopBtn"]);
         }
 
         var stopCapturing = function() {
-            enable(["#host","#port","#delay","#startBtn"]);
+            enable(["#host","#port","#delay","#startBtn","#directoryFld"]);
             disable(["#stopBtn"]);
             clearInterval(intervalId);
         };
@@ -109,7 +121,7 @@
 
         stopBtn.addEventListener('click', stopCapturing);
         startBtn.addEventListener('click', startCapturing);
-
+        let directoryFld = $("#directoryFld");
         var video = document.createElement('video');
         function captureImage() {
             errorDiv.textContent = '';
@@ -125,7 +137,7 @@
                         var ctx = canvas.getContext('2d');
                         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                         var imageData = canvas.toDataURL('image/jpeg');
-                        sendDataToAPI(imageData);
+                        sendDataToAPI(imageData,directoryFld.value);
                         video.srcObject.getTracks().forEach(track => track.stop());
                     };
                 })
@@ -135,11 +147,12 @@
                 });
         }
 
-        function sendDataToAPI(imageData) {
+        function sendDataToAPI(imageData,directory) {
             fetch(HOST + (PORT!=80 && PORT!=443?":" + PORT:"") + '/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'directory': directory
                 },
                 body: JSON.stringify({ image: imageData }),
             })

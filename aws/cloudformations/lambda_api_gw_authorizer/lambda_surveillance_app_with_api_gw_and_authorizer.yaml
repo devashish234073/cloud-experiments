@@ -33,9 +33,6 @@ Resources:
     Properties:
       Runtime: nodejs20.x
       Handler: index.handler
-      Policies:
-        - S3CrudPolicy:
-            BucketName: my-bucket-for-xray
       Events:
         postEndpoint:
           Type: Api
@@ -49,7 +46,7 @@ Resources:
 
         export const handler = async (event) => {
           const imageData = JSON.parse(event.body).image;
-          console.log("imageData",imageData);
+          console.log("event",event);
           const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
 
           const timestamp = Date.now().toString();
@@ -57,7 +54,7 @@ Resources:
           let delay = 10;
 
           const params = {
-            Bucket: 'my-bucket-for-xray',
+            Bucket: process.env.BUCKET_NAME,
             Key: fileName,
             Body: Buffer.from(base64Data, 'base64'),
             ContentType: 'image/jpeg' 
@@ -85,6 +82,13 @@ Resources:
             }
           }
         };
+      Environment:
+        Variables:
+          BUCKET_NAME:
+            Ref: BucketName
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref BucketName
 
 
 
