@@ -24,7 +24,7 @@
             height: 30px;
         }
 
-        input {
+        #delay {
             width: 287px;
         }
 
@@ -32,7 +32,7 @@
             width: 300px;
         }
 
-        button {
+        #slider,button {
             width: 600px;
         }
         table {
@@ -52,6 +52,9 @@
             </td>
         </tr>
         <tr>
+            <td colspan="2"><input id="slider" type="range" min="0" value="0"></td>
+        </tr>
+        <tr>
             <td>delay</td>
             <td><input type="number" id="delay" value="20"></td>
         </tr>
@@ -68,16 +71,21 @@
         async function fetchImages() {
             const response = await fetch('/api/images');
             const images = await response.json();
+            $("#slider").setAttribute("max",images.length-1);
             return images;
+        }
+        function $(selector) {
+            return document.querySelector(selector);
         }
 
         function startSlideshow(images, interval = parseInt($("#delay").value)) {
             $("#delay").disabled = true;
-            let index = 0;
-            const imgElement = document.getElementById('slideshow-image');
+            const imgElement = $('#slideshow-image');
 
             function showNextImage() {
                 if (!isPaused) {
+                    slider.value = parseInt(slider.value)+1;
+                    let index = slider.value;
                     imgElement.src = `/images/${images[index]}`;
                     index = (index + 1) % images.length;
                 }
@@ -87,6 +95,20 @@
             setInterval(showNextImage, interval);
         }
 
+        function showImageAtIndex(index) {
+            if(images==null) {
+                return;
+            }
+            $('#slideshow-image').src = `/images/${images[index]}`;
+            index = (index + 1) % images.length;
+        }
+
+        let slider = $("#slider");
+        slider.addEventListener("change",()=>{
+            showImageAtIndex(parseInt(slider.value));
+        });
+
+        let images = null;
         async function start() {
             if ($("#btn").innerText == "Pause") {
                 isPaused = true;
@@ -97,11 +119,11 @@
                 $("#btn").innerText = "Pause";
                 return;
             }
-            const images = await fetchImages();
+            images = await fetchImages();
             if (images.length > 0) {
                 startSlideshow(images);
             } else {
-                document.getElementById('slideshow').innerText = 'No images found';
+                $('#slideshow').innerText = 'No images found';
             }
             $("#btn").innerText = "Pause";
         }
