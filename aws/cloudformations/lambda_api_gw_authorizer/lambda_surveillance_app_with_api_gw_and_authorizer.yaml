@@ -46,27 +46,28 @@ Resources:
             Path: /
             Method: POST
       InlineCode: |
-        import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+        import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
         const s3Client = new S3Client({ region: "ap-south-1" });
 
-        export const handler = async (event) => {
-          const imageData = JSON.parse(event.body).image;
-          console.log("event.headers",event.headers);
-          const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
+        const streamToString = (stream) => {
+            return new Promise((resolve, reject) => {
+            const chunks = [];
+            stream.on('data', (chunk) => chunks.push(chunk));
+            stream.on('error', reject);
+            stream.on('end', () => resolve(Buffer.concat(chunks)));
+          });
+        };
 
-          const timestamp = Date.now().toString();
-          let fileName = `image_${timestamp}.jpeg`;
-          if(event.headers && event.headers.prefix) {
-              fileName = event.headers.prefix + fileName;
-          }
+        export const handler = async (event) => {
           if(event.headers && event.headers.getImageNames) {
             try{
               const params = {
                 Bucket: process.env.BUCKET_NAME,
                 Prefix: '',
               };
-              const data = await s3.listObjectsV2(params).promise();
-              const jpgFiles = data.Contents.filter(item => item.Key.endsWith('.jpg')).map(item => item.Key);
+              const command = new ListObjectsV2Command(params);
+              const data = await s3Client.send(command);
+              const jpgFiles = data.Contents.filter(item => item.Key.endsWith('.jpg') || item.Key.endsWith('.jpeg')).map(item => item.Key);
               return {
                 statusCode: 200,
                 headers: {
@@ -89,13 +90,15 @@ Resources:
                 Bucket: process.env.BUCKET_NAME,
                 Key: event.headers.getImage,
               };
-              const data = await s3.getObject(params).promise();
+              const command = new GetObjectCommand(params);
+              const data = await s3Client.send(command);
+              const imageData = await streamToString(data.Body);
               return {
                 statusCode: 200,
                 headers: {
                 'Content-Type': 'image/jpeg',
                 },
-                body: data.Body.toString('base64'),
+                body: imageData.toString('base64'),
                 isBase64Encoded: true,
               };
             } catch (err) {
@@ -107,6 +110,15 @@ Resources:
                 body: JSON.stringify({ error: err.message }),
               };
             }
+          }
+          const imageData = JSON.parse(event.body).image;
+          console.log("event.headers",event.headers);
+          const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
+
+          const timestamp = Date.now().toString();
+          let fileName = `image_${timestamp}.jpeg`;
+          if(event.headers && event.headers.prefix) {
+              fileName = event.headers.prefix + fileName;
           }
           let delay = 10;
 
