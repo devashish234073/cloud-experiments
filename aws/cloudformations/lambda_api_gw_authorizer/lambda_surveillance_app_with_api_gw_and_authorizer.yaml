@@ -62,9 +62,9 @@ Resources:
           const responseHeaders = {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,getImage,GetImage,getImageNames,Getimagenames'
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Imgnames,Getimg'
           };
-          if(event.headers && event.headers.getImageNames) {
+          if(event.headers && event.headers.Imgnames) {
             responseHeaders['Content-Type']='application/json';
             try{
               const params = {
@@ -86,12 +86,12 @@ Resources:
                 body: JSON.stringify({ error: err.message }),
               };
             }
-          } else if(event.headers && event.headers.getImage) {
+          } else if(event.headers && event.headers.Getimg) {
             responseHeaders['Content-Type']='application/json';
             try{
               const params = {
                 Bucket: process.env.BUCKET_NAME,
-                Key: event.headers.getImage,
+                Key: event.headers.Getimg,
               };
               const command = new GetObjectCommand(params);
               const data = await s3Client.send(command);
@@ -112,6 +112,13 @@ Resources:
             }
           }
           const imageData = JSON.parse(event.body).image;
+          if(imageData==null) {
+            return {
+              statusCode: 200,
+              headers: responseHeaders,
+              body: JSON.stringify({ message: 'No image body present' }),
+            };
+          }
           console.log("event.headers",event.headers);
           const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
 
@@ -229,7 +236,7 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,getImage,GetImage,getImageNames,Getimagenames'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,Imgnames,Getimg'"
               method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         PassthroughBehavior: WHEN_NO_MATCH
