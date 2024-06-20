@@ -59,7 +59,13 @@ Resources:
         };
 
         export const handler = async (event) => {
+          const responseHeaders = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,getImage,GetImage,getImageNames,Getimagenames'
+          };
           if(event.headers && event.headers.getImageNames) {
+            responseHeaders['Content-Type']='application/json';
             try{
               const params = {
                 Bucket: process.env.BUCKET_NAME,
@@ -70,21 +76,18 @@ Resources:
               const jpgFiles = data.Contents.filter(item => item.Key.endsWith('.jpg') || item.Key.endsWith('.jpeg')).map(item => item.Key);
               return {
                 statusCode: 200,
-                headers: {
-                'Content-Type': 'application/json',
-                },
+                headers: responseHeaders,
                 body: JSON.stringify(jpgFiles),
               };
             } catch (err) {
               return {
                 statusCode: 500,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
+                headers: responseHeaders,
                 body: JSON.stringify({ error: err.message }),
               };
             }
           } else if(event.headers && event.headers.getImage) {
+            responseHeaders['Content-Type']='application/json';
             try{
               const params = {
                 Bucket: process.env.BUCKET_NAME,
@@ -93,20 +96,17 @@ Resources:
               const command = new GetObjectCommand(params);
               const data = await s3Client.send(command);
               const imageData = await streamToString(data.Body);
+              responseHeaders['Content-Type']='image/jpeg';
               return {
                 statusCode: 200,
-                headers: {
-                'Content-Type': 'image/jpeg',
-                },
+                headers: responseHeaders,
                 body: imageData.toString('base64'),
                 isBase64Encoded: true,
               };
             } catch (err) {
               return {
                 statusCode: 500,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
+                headers: responseHeaders,
                 body: JSON.stringify({ error: err.message }),
               };
             }
@@ -127,11 +127,6 @@ Resources:
             Key: fileName,
             Body: Buffer.from(base64Data, 'base64'),
             ContentType: 'image/jpeg' 
-          };
-          const responseHeaders = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
           };
           if (event.httpMethod === 'OPTIONS') {
             return {
@@ -234,7 +229,7 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,getImage,GetImage,getImageNames,Getimagenames'"
               method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         PassthroughBehavior: WHEN_NO_MATCH
