@@ -59,6 +59,55 @@ Resources:
           if(event.headers && event.headers.prefix) {
               fileName = event.headers.prefix + fileName;
           }
+          if(event.headers && event.headers.getImageNames) {
+            try{
+              const params = {
+                Bucket: process.env.BUCKET_NAME,
+                Prefix: '',
+              };
+              const data = await s3.listObjectsV2(params).promise();
+              const jpgFiles = data.Contents.filter(item => item.Key.endsWith('.jpg')).map(item => item.Key);
+              return {
+                statusCode: 200,
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jpgFiles),
+              };
+            } catch (err) {
+              return {
+                statusCode: 500,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ error: err.message }),
+              };
+            }
+          } else if(event.headers && event.headers.getImage) {
+            try{
+              const params = {
+                Bucket: process.env.BUCKET_NAME,
+                Key: event.headers.getImage,
+              };
+              const data = await s3.getObject(params).promise();
+              return {
+                statusCode: 200,
+                headers: {
+                'Content-Type': 'image/jpeg',
+                },
+                body: data.Body.toString('base64'),
+                isBase64Encoded: true,
+              };
+            } catch (err) {
+              return {
+                statusCode: 500,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ error: err.message }),
+              };
+            }
+          }
           let delay = 10;
 
           const params = {
