@@ -83,7 +83,7 @@ Resources:
               const command = new PutObjectCommand(params);
               await s3Client.send(command);
               console.log('Image uploaded successfully:', fileName);
-              return { statusCode: 200, headers: responseHeaders, body: '{"status":"Image uploaded successfully","delay":'+delay+'}' };
+              return { statusCode: 200, headers: responseHeaders, body: '{"status":"Image "+fileName+" uploaded successfully","delay":'+delay+'}' };
             } catch (error) {
               console.error('Error uploading image to S3:', error);
               return { statusCode: 500, headers: responseHeaders, body: '{"status":"Error uploading image"}' };
