@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Slideshow</title>
+    <style>
+        #slideshow {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+
+        input,
+        button {
+            height: 30px;
+        }
+
+        input {
+            width: 287px;
+        }
+
+        td {
+            width: 300px;
+        }
+
+        button {
+            width: 600px;
+        }
+        table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td colspan="2">
+                <div id="slideshow">
+                    <img id="slideshow-image" src="" alt="Slideshow Image">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>delay</td>
+            <td><input type="number" id="delay" value="20"></td>
+        </tr>
+        <tr>
+            <td colspan="2"><button onclick="start()" id="btn">Start</button></td>
+        </tr>
+    </table>
+
+    <script>
+        function $(selector) {
+            return document.querySelector(selector);
+        }
+        let isPaused = false;
+        async function fetchImages() {
+            const response = await fetch('/api/images');
+            const images = await response.json();
+            return images;
+        }
+
+        function startSlideshow(images, interval = parseInt($("#delay").value)) {
+            $("#delay").disabled = true;
+            let index = 0;
+            const imgElement = document.getElementById('slideshow-image');
+
+            function showNextImage() {
+                if (!isPaused) {
+                    imgElement.src = `/images/${images[index]}`;
+                    index = (index + 1) % images.length;
+                }
+            }
+
+            showNextImage(); // Show the first image immediately
+            setInterval(showNextImage, interval);
+        }
+
+        async function start() {
+            if ($("#btn").innerText == "Pause") {
+                isPaused = true;
+                $("#btn").innerText = "Resume";
+                return;
+            } else if ($("#btn").innerText == "Resume") {
+                isPaused = false;
+                $("#btn").innerText = "Pause";
+                return;
+            }
+            const images = await fetchImages();
+            if (images.length > 0) {
+                startSlideshow(images);
+            } else {
+                document.getElementById('slideshow').innerText = 'No images found';
+            }
+            $("#btn").innerText = "Pause";
+        }
+    </script>
+</body>
+
+</html>
