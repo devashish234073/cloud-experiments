@@ -226,6 +226,8 @@
             imageDataArray = [];
             if(tmr!=null) {
                 clearInterval(tmr);
+                isPaused = false;
+                pauseButton.innerText = "Pause";
             }
             tmr = null;
             $("#pregressBar").style.display = "block";

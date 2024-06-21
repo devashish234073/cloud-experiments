@@ -64,7 +64,7 @@ Resources:
             'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Imgnames,Getimg'
           };
-          if(event.headers && event.headers.Imgnames) {
+          if(event.headers && (event.headers.Imgnames || event.headers.imgnames)) {
             responseHeaders['Content-Type']='application/json';
             try{
               const params = {
@@ -86,12 +86,12 @@ Resources:
                 body: JSON.stringify({ error: err.message }),
               };
             }
-          } else if(event.headers && event.headers.Getimg) {
+          } else if(event.headers && (event.headers.Getimg || event.headers.getimg)) {
             responseHeaders['Content-Type']='application/json';
             try{
               const params = {
                 Bucket: process.env.BUCKET_NAME,
-                Key: event.headers.Getimg,
+                Key: event.headers.Getimg?event.headers.Getimg:event.headers.getimg,
               };
               const command = new GetObjectCommand(params);
               const data = await s3Client.send(command);
