@@ -43,13 +43,9 @@
             }
             let fileNameSplit = split1[0].split("_");
             let d="";
-                      
-            for(let i in fileNameSplit){
-                let f=fileNameSplit[i];
-                        
-                if(!isNaN(f)){
-                   d=(new Date(parseInt(f))).toString();
-                }
+            let f=fileNameSplit[fileNameSplit.length-1];
+            if(!isNaN(f)){
+                d=(new Date(parseInt(f))).toString();
             }
             return d;
         }
