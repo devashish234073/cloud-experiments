@@ -57,7 +57,9 @@
 
                 if (response.ok) {
                     const imageNames = await response.json();
-
+                    if(imageNames && imageNames.length>0){
+                      $("#totalImg").innerText = imageNames.length+" images fetched, last file "+imageNames[imageNames.length-1];
+                    }
                     imageNames.forEach(name => {
                         let nameSplit = name.split("_");
                         if (nameSplit.length > 3) {
@@ -278,6 +280,7 @@
             <td><label for="apiEndpoint">API GW Endpoint:</label></td>
             <td><input type="text" id="apiEndpoint" placeholder="Enter API endpoint"></td>
             <td><button onclick="fetchImageNames()">Fetch Image Names</button></td>
+            <td id="totalImg"></td>
         </tr>
     </table>
     <Script>
