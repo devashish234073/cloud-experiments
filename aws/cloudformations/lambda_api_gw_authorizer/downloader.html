@@ -58,7 +58,16 @@
                 if (response.ok) {
                     const imageNames = await response.json();
                     if(imageNames && imageNames.length>0){
-                      $("#totalImg").innerText = imageNames.length+" images fetched, last file "+imageNames[imageNames.length-1];
+                      let lastFileName = imageNames[imageNames.length-1];
+                      let lastFileNameSplit = lastFileName.split("_");
+                      let d="";
+                      for(let i in lastFileNameSplit){
+                        let f=lastFileNameSplit[i];
+                        if(!isNaN(f)){
+                          d=", equivalent date: ("+(new Date(parseInt(f))+")";
+                        }
+                      }
+                      $("#totalImg").innerText = imageNames.length+" images fetched, last file "+lastFileName+d;
                     }
                     imageNames.forEach(name => {
                         let nameSplit = name.split("_");
