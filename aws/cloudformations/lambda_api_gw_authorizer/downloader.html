@@ -13,6 +13,7 @@
         input,button, select{
             height: 30px;
             font-size: 18px;
+            width: 100%;
         }
         table {
             margin-top: 20px;
@@ -30,21 +31,28 @@
             color: white;
             border-radius: 5px;
         }
+        .controlTable {
+            border: 1px solid lightgreen;
+        }
         #pregressBar {
             position: fixed;
             width:100%;
             height:100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.9);
             z-index: 1000;
             display:none;
         }
         #status {
+            font-size: 22px;
             width: 100%;
             height: 100%;
             padding-left:20%;
             display: block;
             margin-top:5%;
             color: yellow;
+        }
+        #pause {
+            width: 100px;
         }
     </style>
     <script>
@@ -93,7 +101,7 @@
                     if(imageNames && imageNames.length>0){
                       let lastFileName = imageNames[imageNames.length-1];
                       
-                      $("#totalImg").innerText = imageNames.length+" images fetched, last file "+lastFileName;
+                      $("#totalImg").innerText = imageNames.length+" image names fetched, last file "+lastFileName;
                       $("#imageDate").innerText = "Equivalent date: "+getImgDate(lastFileName);
                     }
                     imageNames.forEach(name => {
@@ -116,12 +124,20 @@
 
 
                     let indxx = 0;
-                    let table = _("table");
+                    
                     for (let category in imagesByCategory) {
+                        let table = _("table");
+                        table.setAttribute("class","controlTable");
                         indxx++;
-                        let imgContainer = _("tr");
-                        table.appendChild(imgContainer);
-                        imgContainer.setAttribute("class", "imgContainer");
+                        let imgContainer0 = _("tr");
+                        let imgContainer1 = _("tr");
+                        let imgContainer2 = _("tr");
+                        table.appendChild(imgContainer0);
+                        table.appendChild(imgContainer1);
+                        table.appendChild(imgContainer2);
+                        imgContainer0.setAttribute("class", "imgContainer");
+                        imgContainer1.setAttribute("class", "imgContainer");
+                        imgContainer2.setAttribute("class", "imgContainer");
                         let label = _("label");
                         label.innerText = category;
                         let select = _("select");
@@ -157,10 +173,11 @@
                         tds[1].appendChild(select);
                         tds[2].appendChild(select2);
                         tds[3].appendChild(button);
-                        imgContainer.appendChild(tds[0]);
-                        imgContainer.appendChild(tds[1]);
-                        imgContainer.appendChild(tds[2]);
-                        imgContainer.appendChild(tds[3]);
+                        tds[1].setAttribute("colspan","3");
+                        imgContainer1.appendChild(tds[1]);
+                        imgContainer0.appendChild(tds[0]);
+                        imgContainer0.appendChild(tds[2]);
+                        imgContainer0.appendChild(tds[3]);
 
                         imagesByCategory[category].forEach(name => {
                             const option = _('option');
@@ -168,8 +185,8 @@
                             option.textContent = name;
                             select.appendChild(option);
                         });
+                        document.body.appendChild(table);
                     }
-                    document.body.appendChild(table);
                 } else {
                     console.error('Error fetching image names:', response.statusText);
                 }
@@ -230,6 +247,7 @@
                 imageDetails = _("span");
                 pauseButton.innerText = "Pause";
                 pauseButton.setAttribute("onclick", "playImageDataArray()");
+                pauseButton.setAttribute("id","pause");
                 tr0.appendChild(td0);
                 td0.appendChild(pauseButton);
                 td0.appendChild(imageDetails);
@@ -249,10 +267,10 @@
         function startSlideShowAtIndex(delay) {
             tmr = setInterval(() => {
                 if (!isPaused) {
-                    let imgData = imageDataArray[imgDataIndx];
+                    let imgData = imageDataArray[imgDataIndx].data;
                     imgTag.src = imgData;
                     if(imageDetails) {
-                        imageDetails.innerText = (imgDataIndx+1) + " of " + imageDataArray.length;
+                        imageDetails.innerText = " ["+(imgDataIndx+1) + " of " + imageDataArray.length+"] "+getImgDate(imageDataArray[imgDataIndx].fileName);
                     }
                     console.log("displaying image " + imgDataIndx + " of " + imageDataArray.length + " images");
                     imgDataIndx = (imgDataIndx+1)%imageDataArray.length;
@@ -285,7 +303,7 @@
 
                     if (response.ok) {
                         const imageData = await response.text();
-                        imageDataArray.push(`data:image/jpeg;base64,${imageData}`);
+                        imageDataArray.push({"fileName":selectedImage,"data":`data:image/jpeg;base64,${imageData}`});
                         $("#status").innerText = "Loaded ("+imageDataArray.length+"/"+imageArray.length+") "+selectedImage;
                         if (imageDataArray.length >= imageArray.length) {
                             $("#pregressBar").style.display = "none";
@@ -309,13 +327,15 @@
     <table>
         <tr>
             <td colspan="3">
-                <h1>Image Viewer</h1>
+                <h1>Cam Viewer</h1>
             </td>
         </tr>
         <tr>
             <td><label for="apiEndpoint">API GW Endpoint:</label></td>
             <td><input type="text" id="apiEndpoint" placeholder="Enter API endpoint"></td>
-            <td><button onclick="fetchImageNames()">Fetch Image Names</button></td>
+        </tr>
+        <tr>
+            <td colspan="2"><button onclick="fetchImageNames()">Fetch Image Names</button></td>
         </tr>
         <tr><td id="totalImg" colspan="3"></td></tr>
         <tr><td id="imageDate" colspan="3"></td></tr>
