@@ -280,8 +280,8 @@
             <td><label for="apiEndpoint">API GW Endpoint:</label></td>
             <td><input type="text" id="apiEndpoint" placeholder="Enter API endpoint"></td>
             <td><button onclick="fetchImageNames()">Fetch Image Names</button></td>
-            <td id="totalImg"></td>
         </tr>
+        <tr><td id="totalImg" colspan="3"></td></tr>
     </table>
     <Script>
         $('#apiEndpoint').addEventListener("focus",()=>{
