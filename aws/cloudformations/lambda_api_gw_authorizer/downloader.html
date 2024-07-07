@@ -59,15 +59,19 @@
                     const imageNames = await response.json();
                     if(imageNames && imageNames.length>0){
                       let lastFileName = imageNames[imageNames.length-1];
-                      let lastFileNameSplit = lastFileName.split("_");
+                      let split1=lastFileName.split(".");
+                      let lastFileNameSplit = split1[0].split("_");
                       let d="";
+                      
                       for(let i in lastFileNameSplit){
                         let f=lastFileNameSplit[i];
+                        
                         if(!isNaN(f)){
                           d=", equivalent date: ("+(new Date(parseInt(f)))+")";
                         }
                       }
-                      $("#totalImg").innerText = imageNames.length+" images fetched, last file "+lastFileName+d;
+                      $("#totalImg").innerText = imageNames.length+" images fetched, last file "+lastFileName;
+                      $("#imageDate").innerText = d;
                     }
                     imageNames.forEach(name => {
                         let nameSplit = name.split("_");
@@ -291,6 +295,7 @@
             <td><button onclick="fetchImageNames()">Fetch Image Names</button></td>
         </tr>
         <tr><td id="totalImg" colspan="3"></td></tr>
+        <tr><td id="imageDate" colspan="3"></td></tr>
     </table>
     <Script>
         $('#apiEndpoint').addEventListener("focus",()=>{
