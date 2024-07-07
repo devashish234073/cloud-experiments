@@ -36,6 +36,23 @@
         function _(tag) {
             return document.createElement(tag);
         }
+        function getImgDate(fileName){
+            let split1=fileName.split(".");
+            if(split1.length!=2){
+                return "";
+            }
+            let fileNameSplit = split1[0].split("_");
+            let d="";
+                      
+            for(let i in fileNameSplit){
+                let f=fileNameSplit[i];
+                        
+                if(!isNaN(f)){
+                   d=(new Date(parseInt(f))).toString();
+                }
+            }
+            return d;
+        }
         async function fetchImageNames() {
             const apiEndpoint = document.getElementById('apiEndpoint').value.trim();
             if(apiEndpoint=="") {
@@ -59,19 +76,9 @@
                     const imageNames = await response.json();
                     if(imageNames && imageNames.length>0){
                       let lastFileName = imageNames[imageNames.length-1];
-                      let split1=lastFileName.split(".");
-                      let lastFileNameSplit = split1[0].split("_");
-                      let d="";
                       
-                      for(let i in lastFileNameSplit){
-                        let f=lastFileNameSplit[i];
-                        
-                        if(!isNaN(f)){
-                          d=", equivalent date: ("+(new Date(parseInt(f)))+")";
-                        }
-                      }
                       $("#totalImg").innerText = imageNames.length+" images fetched, last file "+lastFileName;
-                      $("#imageDate").innerText = d;
+                      $("#imageDate").innerText = "Equivalent date: "+getImgDate(lastFileName);
                     }
                     imageNames.forEach(name => {
                         let nameSplit = name.split("_");
