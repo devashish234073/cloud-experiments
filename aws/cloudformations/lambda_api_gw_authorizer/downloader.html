@@ -5,56 +5,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <style>
-        body{
+        body {
             background-color: black;
             color: white;
         }
-        input,button, select{
+
+        input,
+        button,
+        select {
             height: 30px;
             font-size: 18px;
             width: 100%;
         }
+
         table {
             margin-top: 20px;
             margin-left: auto;
             margin-right: auto;
         }
-        #totalImg,#imageDate{
+
+        #totalImg,
+        #imageDate {
             font-size: 13px;
-            color:yellow;
+            color: yellow;
         }
-        button{
+
+        button {
             border: none;
             height: 34px !important;
             background-color: green;
             color: white;
             border-radius: 5px;
         }
+
         .controlTable {
             border: 1px solid lightgreen;
         }
+
         #pregressBar {
             position: fixed;
-            width:100%;
-            height:100%;
-            background-color: rgba(0,0,0,0.9);
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
             z-index: 1000;
-            display:none;
+            display: none;
         }
+
         #status {
             font-size: 22px;
             width: 100%;
             height: 100%;
-            padding-left:20%;
+            padding-left: 20%;
             display: block;
-            margin-top:5%;
+            margin-top: 5%;
             color: yellow;
         }
+
         #pause {
             width: 100px;
         }
     </style>
+    <script>
+        let modelFirstLoadDone = false;
+        function detectObjects() {
+            const img = document.getElementById('imageContainer');
+            console.log("detecting image in",img);
+            if(!modelFirstLoadDone) {
+                $("#pregressBar").style.display = "block";
+                $("#status").innerText = "Please wait while model is loading...";   
+            }
+            cocoSsd.load().then(model => {
+                if(!modelFirstLoadDone) {
+                    $("#pregressBar").style.display = "none";
+                    $("#status").innerText = "";
+                    modelFirstLoadDone = true;
+                }
+                model.detect(img).then(predictions => {
+                    console.log('Predictions: ', predictions);
+                    let predictionTable = document.querySelector("#predictionTable");
+                    predictionTable.innerHTML = ''; // Clear previous predictions
+                    for (let i in predictions) {
+                        let cls = predictions[i].class;
+                        let score = predictions[i].score;
+                        let tr = document.createElement("tr");
+                        let td0 = document.createElement("td");
+                        let td1 = document.createElement("td");
+                        td0.innerText = cls;
+                        td1.innerText = score.toFixed(2); // Limit score to two decimal places
+                        tr.appendChild(td0);
+                        tr.appendChild(td1);
+                        predictionTable.appendChild(tr);
+                    }
+                    drawBoxes(img, predictions);
+                });
+            });
+        }
+
+        function drawBoxes(originalImg, predictions) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = originalImg.width;
+            canvas.height = originalImg.height;
+
+            ctx.drawImage(originalImg, 0, 0, originalImg.width, originalImg.height);
+
+            predictions.forEach(prediction => {
+                const box = prediction.bbox;
+                ctx.beginPath();
+                ctx.rect(box[0], box[1], box[2], box[3]);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'red';
+                ctx.fillStyle = 'red';
+                ctx.stroke();
+                ctx.fillText(prediction.class, box[0], box[1] > 10 ? box[1] - 5 : 10);
+            });
+            originalImg.style.display = "none";
+        }
+    </script>
     <script>
         const UNCATEGORIZED = "Uncategorized";
         let imagesByCategory = {};
@@ -64,22 +135,28 @@
         function _(tag) {
             return document.createElement(tag);
         }
-        function getImgDate(fileName){
-            let split1=fileName.split(".");
-            if(split1.length!=2){
+        function getImgDate(fileName) {
+            let split1 = fileName.split(".");
+            if (split1.length != 2) {
                 return "";
             }
             let fileNameSplit = split1[0].split("_");
-            let d="";
-            let f=fileNameSplit[fileNameSplit.length-1];
-            if(!isNaN(f)){
-                d=(new Date(parseInt(f))).toString();
+            let d = "";
+            let f = fileNameSplit[fileNameSplit.length - 1];
+            if (!isNaN(f)) {
+                d = (new Date(parseInt(f))).toString();
             }
             return d;
         }
         async function fetchImageNames() {
-            const apiEndpoint = document.getElementById('apiEndpoint').value.trim();
-            if(apiEndpoint=="") {
+            let objectDetection = $("#objectDetection");
+            if(objectDetection.checked) {
+                delay = 700;
+            } else {
+                delay = 250;
+            }
+            const apiEndpoint = $('#apiEndpoint').value.trim();
+            if (apiEndpoint == "") {
                 alert("api gw endpoint is needed");
                 return;
             }
@@ -98,11 +175,11 @@
 
                 if (response.ok) {
                     const imageNames = await response.json();
-                    if(imageNames && imageNames.length>0){
-                      let lastFileName = imageNames[imageNames.length-1];
-                      
-                      $("#totalImg").innerText = imageNames.length+" image names fetched, last file "+lastFileName;
-                      $("#imageDate").innerText = "Equivalent date: "+getImgDate(lastFileName);
+                    if (imageNames && imageNames.length > 0) {
+                        let lastFileName = imageNames[imageNames.length - 1];
+
+                        $("#totalImg").innerText = imageNames.length + " image names fetched, last file " + lastFileName;
+                        $("#imageDate").innerText = "Equivalent date: " + getImgDate(lastFileName);
                     }
                     imageNames.forEach(name => {
                         let nameSplit = name.split("_");
@@ -124,10 +201,10 @@
 
 
                     let indxx = 0;
-                    
+
                     for (let category in imagesByCategory) {
                         let table = _("table");
-                        table.setAttribute("class","controlTable");
+                        table.setAttribute("class", "controlTable");
                         indxx++;
                         let imgContainer0 = _("tr");
                         let imgContainer1 = _("tr");
@@ -173,7 +250,7 @@
                         tds[1].appendChild(select);
                         tds[2].appendChild(select2);
                         tds[3].appendChild(button);
-                        tds[1].setAttribute("colspan","3");
+                        tds[1].setAttribute("colspan", "3");
                         imgContainer1.appendChild(tds[1]);
                         imgContainer0.appendChild(tds[0]);
                         imgContainer0.appendChild(tds[2]);
@@ -221,7 +298,7 @@
             fetchImages(imageArray.reverse());
         }
         let isPaused = false;
-        let delay = 50;
+        let delay = 1000;
         let pauseButton = null;
         let imgTag = null;
         let tmr = null;
@@ -230,7 +307,7 @@
         function playImageDataArray() {
             imgTag = $('#imageContainer');
             if (tmr != null) {
-                if (pauseButton.innerText.indexOf("Pause")>-1) {
+                if (pauseButton.innerText.indexOf("Pause") > -1) {
                     isPaused = true;
                     pauseButton.innerText = "Resume";
                 } else {
@@ -247,7 +324,7 @@
                 imageDetails = _("span");
                 pauseButton.innerText = "Pause";
                 pauseButton.setAttribute("onclick", "playImageDataArray()");
-                pauseButton.setAttribute("id","pause");
+                pauseButton.setAttribute("id", "pause");
                 tr0.appendChild(td0);
                 td0.appendChild(pauseButton);
                 td0.appendChild(imageDetails);
@@ -260,6 +337,9 @@
                 imgTag = _('img');
                 imgTag.setAttribute("id", "imageContainer");
                 td.appendChild(imgTag);
+                let canvas = _('canvas');
+                canvas.setAttribute("id","canvas");
+                td.appendChild(canvas);
             }
             imgDataIndx = 0;
             startSlideShowAtIndex(delay);
@@ -269,18 +349,23 @@
                 if (!isPaused) {
                     let imgData = imageDataArray[imgDataIndx].data;
                     imgTag.src = imgData;
-                    if(imageDetails) {
-                        imageDetails.innerText = " ["+(imgDataIndx+1) + " of " + imageDataArray.length+"] "+getImgDate(imageDataArray[imgDataIndx].fileName);
+                    if (imageDetails) {
+                        imageDetails.innerText = " [" + (imgDataIndx + 1) + " of " + imageDataArray.length + "] " + getImgDate(imageDataArray[imgDataIndx].fileName);
                     }
                     console.log("displaying image " + imgDataIndx + " of " + imageDataArray.length + " images");
-                    imgDataIndx = (imgDataIndx+1)%imageDataArray.length;
+                    let objectDetection = $("#objectDetection");
+                    objectDetection.disabled = true;
+                    if(objectDetection.checked) {
+                        detectObjects();
+                    }
+                    imgDataIndx = (imgDataIndx + 1) % imageDataArray.length;
                 }
             }, delay);
         }
         async function fetchImages(imageArray) {
             console.log("fetching", imageArray);
             imageDataArray = [];
-            if(tmr!=null) {
+            if (tmr != null) {
                 clearInterval(tmr);
                 isPaused = false;
                 pauseButton.innerText = "Pause";
@@ -303,8 +388,8 @@
 
                     if (response.ok) {
                         const imageData = await response.text();
-                        imageDataArray.push({"fileName":selectedImage,"data":`data:image/jpeg;base64,${imageData}`});
-                        $("#status").innerText = "Loaded ("+imageDataArray.length+"/"+imageArray.length+") "+selectedImage;
+                        imageDataArray.push({ "fileName": selectedImage, "data": `data:image/jpeg;base64,${imageData}` });
+                        $("#status").innerText = "Loaded (" + imageDataArray.length + "/" + imageArray.length + ") " + selectedImage;
                         if (imageDataArray.length >= imageArray.length) {
                             $("#pregressBar").style.display = "none";
                             playImageDataArray();
@@ -324,6 +409,7 @@
     <div id="pregressBar">
         <span id="status"></span>
     </div>
+    <table id="predictionTable"></table>
     <table>
         <tr>
             <td colspan="3">
@@ -335,17 +421,25 @@
             <td><input type="text" id="apiEndpoint" placeholder="Enter API endpoint"></td>
         </tr>
         <tr>
+            <td>Object Detection Enabled</td>
+            <td><input type="checkbox" id="objectDetection"></td>
+        </tr>
+        <tr>
             <td colspan="2"><button onclick="fetchImageNames()">Fetch Image Names</button></td>
         </tr>
-        <tr><td id="totalImg" colspan="3"></td></tr>
-        <tr><td id="imageDate" colspan="3"></td></tr>
+        <tr>
+            <td id="totalImg" colspan="3"></td>
+        </tr>
+        <tr>
+            <td id="imageDate" colspan="3"></td>
+        </tr>
     </table>
     <Script>
-        $('#apiEndpoint').addEventListener("focus",()=>{
-            $('#apiEndpoint').setAttribute("type","text");
+        $('#apiEndpoint').addEventListener("focus", () => {
+            $('#apiEndpoint').setAttribute("type", "text");
         });
-        $('#apiEndpoint').addEventListener("blur",()=>{
-            $('#apiEndpoint').setAttribute("type","password");
+        $('#apiEndpoint').addEventListener("blur", () => {
+            $('#apiEndpoint').setAttribute("type", "password");
         });
     </Script>
 </body>
