@@ -9,10 +9,7 @@ paths:
         '200':
           description: 'OK'
       x-amazon-apigateway-integration:
-        httpMethod: GET
-        type: AWS_PROXY
+        httpMethod: POST
+        type: aws_proxy
         uri:
-          Fn::Sub:
-            - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MyLambdaFunction.Arn}/invocations
-            - MyLambdaFunction:
-                Ref: MyLambdaFunction
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MyLambdaFunction.Arn}/invocations
