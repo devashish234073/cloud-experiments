@@ -1,0 +1,207 @@
+Parameters:
+  EurekaServerUrl:
+    Type: String
+    Description: "The private IP address of the Eureka Server"
+    Default: ""
+    NoEcho: false
+  cfVPC:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /stack1/eureka/vpc/id
+  cfSubnet1:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /stack1/eureka/subnet/id
+    
+Resources:
+  ec2ServiceA:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-03f4878755434977f
+      InstanceType: t2.medium
+      KeyName: kp1
+      Tags:
+        - Key: Name
+          Value: EC2 running eureka client service a
+      UserData: 
+        Fn::Base64: 
+          Fn::Join:
+            - ""
+            - 
+              - |
+                #!/bin/bash
+                apt update -y
+                apt-get install -y apache2
+                service apache2 start
+                cat <<EOF > /var/www/html/index.html
+                <!DOCTYPE html>
+                <html>
+                <head>
+                <title>Please wait while startup script completes</title>
+                </head>
+                <body>
+                <h1>Please wait while startup script completes..</h1>
+                <script>
+                    function getRandomInt() {
+                        return Math.floor(Math.random() * 256);
+                    }
+                    var color = 'rgb(' + getRandomInt() + ',' + getRandomInt() + ',' + getRandomInt() + ')';
+                    document.querySelector("h1").style.color = color;
+                    setInterval(function() {
+                        location.reload();
+                    }, 1000);
+                </script>
+                </body>
+                </html>
+                EOF
+                apt install git -y
+                gitv=$(git version)
+                public_ip=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+                git clone https://github.com/spring-guides/gs-service-registration-and-discovery
+                cd gs-service-registration-and-discovery
+                apt install -y openjdk-17-jdk
+                java -version
+                echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" | tee -a /etc/profile.d/jdk.sh
+                apt install -y maven
+                echo $JAVA_HOME
+                cd servicea
+                mvn install
+                cd target
+                java -jar servicea-0.0.1-SNAPSHOT.jar --eureka.client.service-url.defaultZone=
+              - !Ref EurekaServerUrl
+              - "&"
+              - | 
+                cat <<EOF > /var/www/html/index.html
+                <!DOCTYPE html>
+                <html>
+                <head>
+                <title>UI setup done</title>
+                </head>
+                <body>
+                <h1>UI setup done</h1>
+                <p>Git Installed: $gitv<p>
+                <p>Private IP of eureka Server
+              - !Ref EurekaServerUrl
+              - |
+                </p>
+                <p>Links</p>
+                <ul>
+                <li><a href="http://${public_ip}:8081/helloWorld">Click Here To call service A</a></li>
+                </ul>
+                </body>
+                </html>
+                EOF
+                systemctl enable apache2
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          AssociatePublicIpAddress: "true"
+          DeleteOnTermination: "true"
+          SubnetId: !Ref cfSubnet1
+          GroupSet:
+            - !Ref MySecurityGroup
+
+  ec2ServiceB:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-03f4878755434977f
+      InstanceType: t2.medium
+      KeyName: kp1
+      Tags:
+        - Key: Name
+          Value: EC2 running eureka client service b
+      UserData: 
+        Fn::Base64: 
+          Fn::Join:
+            - ""
+            - 
+              - |
+                #!/bin/bash
+                apt update -y
+                apt-get install -y apache2
+                service apache2 start
+                cat <<EOF > /var/www/html/index.html
+                <!DOCTYPE html>
+                <html>
+                <head>
+                <title>Please wait while startup script completes</title>
+                </head>
+                <body>
+                <h1>Please wait while startup script completes..</h1>
+                <script>
+                    function getRandomInt() {
+                        return Math.floor(Math.random() * 256);
+                    }
+                    var color = 'rgb(' + getRandomInt() + ',' + getRandomInt() + ',' + getRandomInt() + ')';
+                    document.querySelector("h1").style.color = color;
+                    setInterval(function() {
+                        location.reload();
+                    }, 1000);
+                </script>
+                </body>
+                </html>
+                EOF
+                apt install git -y
+                gitv=$(git version)
+                public_ip=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+                git clone https://github.com/spring-guides/gs-service-registration-and-discovery
+                cd gs-service-registration-and-discovery
+                apt install -y openjdk-17-jdk
+                java -version
+                echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" | tee -a /etc/profile.d/jdk.sh
+                apt install -y maven
+                echo $JAVA_HOME
+                cd serviceb
+                mvn install
+                cd target
+                java -jar serviceb-0.0.1-SNAPSHOT.jar --eureka.client.service-url.defaultZone=
+              - !Ref EurekaServerUrl
+              - "&"
+              - | 
+                cat <<EOF > /var/www/html/index.html
+                <!DOCTYPE html>
+                <html>
+                <head>
+                <title>UI setup done</title>
+                </head>
+                <body>
+                <h1>UI setup done</h1>
+                <p>Git Installed: $gitv<p>
+                <p>Private IP of eureka Server
+              - !Ref EurekaServerUrl
+              - |
+                </p>
+                <p>Links</p>
+                <ul>
+                <li><a href="http://${public_ip}:8082/helloEureka">Click Here To call service B</a></li>
+                </ul>
+                </body>
+                </html>
+                EOF
+                systemctl enable apache2
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          AssociatePublicIpAddress: "true"
+          DeleteOnTermination: "true"
+          SubnetId: !Ref cfSubnet1
+          GroupSet:
+            - !Ref MySecurityGroup
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref cfVPC
+      GroupDescription: Allow SSH and HTTP traffic
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8761
+          ToPort: 8761
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0

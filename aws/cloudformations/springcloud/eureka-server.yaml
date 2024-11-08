@@ -14,7 +14,7 @@ Resources:
       MapPublicIpOnLaunch: true
       AvailabilityZone: ap-south-1a
 
-  ec2:
+  ec2Eureka:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-03f4878755434977f
@@ -22,13 +22,12 @@ Resources:
       KeyName: kp1
       Tags:
         - Key: Name
-          Value: EC2 running springboot apps
-      UserData: 
-        Fn::Base64: 
+          Value: EC2 running springboot eureka server
+      UserData:
+        Fn::Base64:
           Fn::Join:
             - ""
-            - 
-              - |
+            - - |
                 #!/bin/bash
                 apt update -y
                 apt-get install -y apache2
@@ -68,14 +67,6 @@ Resources:
                 mvn install
                 cd target
                 java -jar eureka-server-0.0.1-SNAPSHOT.jar&
-                cd ../../servicea
-                mvn install
-                cd target
-                java -jar servicea-0.0.1-SNAPSHOT.jar&
-                cd ../../serviceb
-                mvn install
-                cd target
-                java -jar serviceb-0.0.1-SNAPSHOT.jar&
                 cat <<EOF > /var/www/html/index.html
                 <!DOCTYPE html>
                 <html>
@@ -88,8 +79,6 @@ Resources:
                 <p>Links</p>
                 <ul>
                 <li><a href="http://${public_ip}:8761">Click Here To Eureka Server</a></li>
-                <li><a href="http://${public_ip}:8082/helloEureka">Click Here To call service B</a></li>
-                <li><a href="http://${public_ip}:8081/helloWorld">Click Here To call service A</a></li>
                 </ul>
                 </body>
                 </html>
@@ -112,18 +101,6 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 8081
-          ToPort: 8081
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 8082
-          ToPort: 8082
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: 8761
@@ -196,3 +173,17 @@ Resources:
       PortRange:
         From: 22
         To: 22
+
+  VpcArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /stack1/eureka/vpc/id
+      Type: String
+      Value: !Ref cfVPC
+
+  SubnetArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /stack1/eureka/subnet/id
+      Type: String
+      Value: !Ref cfSubnet1
