@@ -1,3 +1,9 @@
+Parameters:
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Default: kp_06_july_2025
+
 Resources:
   cfVPC:
     Type: AWS::EC2::VPC
@@ -27,7 +33,7 @@ Resources:
     Properties:
       ImageId: ami-03f4878755434977f
       InstanceType: t2.micro
-      KeyName: kp1
+      KeyName: !Ref KeyPairName
       UserData:
         Fn::Base64: |
           #!/bin/bash
