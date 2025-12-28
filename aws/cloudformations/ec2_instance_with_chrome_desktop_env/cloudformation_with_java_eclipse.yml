@@ -68,6 +68,32 @@ Resources:
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           dpkg -i google-chrome-stable_current_amd64.deb
           sudo apt-get install -f -y
+          
+          # Install Java (OpenJDK 17)
+          apt install -y openjdk-17-jdk
+          
+          # Install Eclipse
+          cd /opt
+          wget https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2024-12/R/eclipse-java-2024-12-R-linux-gtk-x86_64.tar.gz&r=1 -O eclipse.tar.gz
+          tar -xzf eclipse.tar.gz
+          rm eclipse.tar.gz
+          ln -s /opt/eclipse/eclipse /usr/local/bin/eclipse
+          
+          # Create desktop shortcut for Eclipse
+          mkdir -p /home/ubuntu/Desktop
+          cat <<ECLIPSEEOF > /home/ubuntu/Desktop/eclipse.desktop
+          [Desktop Entry]
+          Type=Application
+          Name=Eclipse
+          Comment=Eclipse IDE
+          Exec=/opt/eclipse/eclipse
+          Icon=/opt/eclipse/icon.xpm
+          Terminal=false
+          Categories=Development;IDE;
+          ECLIPSEEOF
+          chmod +x /home/ubuntu/Desktop/eclipse.desktop
+          chown ubuntu:ubuntu /home/ubuntu/Desktop/eclipse.desktop
+          
           public_ip=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
           echo RUN vncserver AND SETUP THE PASSWORD
           echo THEN RUN ssh -L 5901:localhost:5901 -i ${KeyPairName}.pem ubuntu@$public_ip WITH YOUR LOCAL MACHINE AND THEN CONNECT USING A VNC VIEWER CLIENT AT "$public_ip":5901
@@ -85,6 +111,12 @@ Resources:
           <p>Run 'vncserver' in the ec2($public_ip) ternimal to setup vnc password</p>
           <p>Then run this in terminal/command line from your local machine where you have vncviewer installed: ssh -L 5901:localhost:5901 -i kp1.pem ubuntu@$public_ip  </p>
           <p>Finally connect to "localhost:5901" using your vncviewer client</p>
+          <h2>Installed Software</h2>
+          <ul>
+          <li>Google Chrome</li>
+          <li>Java (OpenJDK 17)</li>
+          <li>Eclipse IDE (2024-12)</li>
+          </ul>
           <h2>Video Tutorial</h2>
           <iframe width="728" height="447" src="https://www.youtube.com/embed/56iJ0n6Us9k" title="EC2 instance with desktop environment | launch using cloudformation template | aws | automation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </body>
