@@ -34,6 +34,12 @@ Resources:
       ImageId: ami-03f4878755434977f
       InstanceType: t3.large
       KeyName: !Ref KeyPairName
+      BlockDeviceMappings:
+      - DeviceName: /dev/sda1
+        Ebs:
+          VolumeSize: 30
+          VolumeType: gp3
+          DeleteOnTermination: true
       UserData:
         Fn::Base64: |
           #!/bin/bash
