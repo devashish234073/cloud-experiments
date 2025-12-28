@@ -83,7 +83,7 @@ Resources:
           <body>
           <h1>Vnc viewer setup done</h1>
           <p>Run 'vncserver' in the ec2($public_ip) ternimal to setup vnc password</p>
-          <p>Then run this in terminal/command line from your local machine where you have vncviewer installed: ssh -L 5901:localhost:5901 -i kp1.pem ubuntu@$public_ip  </p>
+          <p>Then run this in terminal/command line from your local machine where you have vncviewer installed: ssh -L 5901:localhost:5901 -i ${KeyPairName}.pem ubuntu@$public_ip  </p>
           <p>Finally connect to "localhost:5901" using your vncviewer client</p>
           <h2>Video Tutorial</h2>
           <iframe width="728" height="447" src="https://www.youtube.com/embed/56iJ0n6Us9k" title="EC2 instance with desktop environment | launch using cloudformation template | aws | automation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>

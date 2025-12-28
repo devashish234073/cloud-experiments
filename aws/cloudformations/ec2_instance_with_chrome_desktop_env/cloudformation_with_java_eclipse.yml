@@ -109,7 +109,7 @@ Resources:
           <body>
           <h1>Vnc viewer setup done</h1>
           <p>Run 'vncserver' in the ec2($public_ip) ternimal to setup vnc password</p>
-          <p>Then run this in terminal/command line from your local machine where you have vncviewer installed: ssh -L 5901:localhost:5901 -i kp1.pem ubuntu@$public_ip  </p>
+          <p>Then run this in terminal/command line from your local machine where you have vncviewer installed: ssh -L 5901:localhost:5901 -i ${KeyPairName}.pem ubuntu@$public_ip  </p>
           <p>Finally connect to "localhost:5901" using your vncviewer client</p>
           <h2>Installed Software</h2>
           <ul>
