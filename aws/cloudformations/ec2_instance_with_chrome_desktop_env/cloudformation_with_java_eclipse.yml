@@ -79,8 +79,9 @@ Resources:
           apt install -y openjdk-17-jdk
           
           # Install Eclipse
+          # Install Eclipse
           cd /opt
-          wget https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2024-12/R/eclipse-java-2024-12-R-linux-gtk-x86_64.tar.gz&r=1 -O eclipse.tar.gz
+          wget "https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2024-12/R/eclipse-java-2024-12-R-linux-gtk-x86_64.tar.gz&r=1" -O eclipse.tar.gz
           tar -xzf eclipse.tar.gz
           rm eclipse.tar.gz
           ln -s /opt/eclipse/eclipse /usr/local/bin/eclipse
