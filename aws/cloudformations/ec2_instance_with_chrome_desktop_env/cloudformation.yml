@@ -91,7 +91,6 @@ Resources:
           </html>
           EOF
           systemctl enable apache2
-      IamInstanceProfile: !Ref cfInstanceProfile
       NetworkInterfaces:
         - DeviceIndex: 0
           AssociatePublicIpAddress: true
