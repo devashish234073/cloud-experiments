@@ -32,7 +32,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-03f4878755434977f
-      InstanceType: t2.micro
+      InstanceType: t3.medium
       KeyName: !Ref KeyPairName
       UserData:
         Fn::Base64: |
@@ -70,8 +70,8 @@ Resources:
           sudo apt-get install -f -y
           public_ip=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
           echo RUN vncserver AND SETUP THE PASSWORD
-          echo THEN RUN ssh -L 5901:localhost:5901 -i kp1.pem ubuntu@$public_ip WITH YOUR LOCAL MACHINE AND THEN CONNECT USING A VNC VIEWER CLIENT AT "$public_ip":5901
-          echo echo ssh -L 5901:localhost:5901 -i kp1.pem ubuntu@$public_ip>/home/ubuntu/tunnelvnc.sh
+          echo THEN RUN ssh -L 5901:localhost:5901 -i ${KeyPairName}.pem ubuntu@$public_ip WITH YOUR LOCAL MACHINE AND THEN CONNECT USING A VNC VIEWER CLIENT AT "$public_ip":5901
+          echo echo ssh -L 5901:localhost:5901 -i ${KeyPairName}.pem ubuntu@$public_ip>/home/ubuntu/tunnelvnc.sh
           echo Run the above ssh command in your local machine after runnign vncserver command to setup the password >>/home/ubuntu/tunnelvnc.sh
           chmod a+x /home/ubuntu/tunnelvnc.sh
           cat <<EOF > /var/www/html/index.html
