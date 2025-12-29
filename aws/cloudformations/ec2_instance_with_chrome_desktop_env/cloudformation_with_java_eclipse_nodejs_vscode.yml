@@ -134,6 +134,8 @@ Resources:
           <li>Google Chrome</li>
           <li>Java (OpenJDK 17)</li>
           <li>Eclipse IDE (2024-12)</li>
+          <li>Node 22</li>
+          <li>VS Code</li>
           </ul>
           <h2>Video Tutorial</h2>
           <iframe width="728" height="447" src="https://www.youtube.com/embed/56iJ0n6Us9k" title="EC2 instance with desktop environment | launch using cloudformation template | aws | automation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
